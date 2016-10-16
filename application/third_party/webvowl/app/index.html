@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+	<link rel="stylesheet" type="text/css" href="css/webvowl.css"/>
+	<link rel="stylesheet" type="text/css" href="css/webvowl.app.css"/>
+
+
+</head>
+<body>
+
+
+<main>
+	<section id="canvasArea" style="height: 600px;">
+
+		<div id="loading-info">
+			<div id="loading-error" class="hidden">
+				<div id="error-info"></div>
+				<div id="error-description-button" class="hidden">Show error details</div>
+				<div id="error-description-container" class="hidden">
+					<pre id="error-description"></pre>
+				</div>
+			</div>
+
+			<div id="loading-progress" class="hidden">
+				<span>Loading ontology... </span><div class="spin">&#8635;</div>
+			</div>
+
+		</div>
+
+		<div id="graph"></div>
+
+	</section>
+	<aside id="detailsArea">
+		<section id="generalDetails">
+
+			<h1 class="vtitle"></h1>
+			<span><a id="about" href=""></a></span>
+			<h5>Version: <span id="version"></span></h5>
+			<h5>Author(s): <span id="authors"></span></h5>
+			<p id="description"></p>
+
+
+			<h3>Metadata.</h3>
+			<div id="ontology-metadata"></div>
+
+			<h3>Statistics.</h3>
+			<p>Classes: <span id="classCount"></span></p>
+			<p>Object prop.: <span id="objectPropertyCount"></span></p>
+			<p>Datatype prop.: <span id="datatypePropertyCount"></span></p>
+			<p>Individuals: <span id="individualCount"></span></p>
+			<p>Nodes: <span id="nodeCount"></span></p>
+			<p>Edges: <span id="edgeCount"></span></p>
+
+
+
+			<h3 id="selection-details-triggerr">Selection Details</h3>
+			<div id="selection-details">
+				<div id="classSelectionInformation" class="hidden">
+					<p>Name: <span id="name"></span></p>
+					<p>Type: <span id="typeNode"></span></p>
+					<p>Equiv.: <span id="classEquivUri"></span></p>
+					<p>Disjoint: <span id="disjointNodes"></span></p>
+					<p>Charac.: <span id="classAttributes"></span></p>
+					<p>Individuals: <span id="individuals"></span></p>
+					<p>Description: <span id="nodeDescription"></span></p>
+					<p>Comment: <span id="nodeComment"></span></p>
+				</div>
+				<div id="propertySelectionInformation" class="hidden">
+					<p>Name: <span id="propname"></span></p>
+					<p>Type: <span id="typeProp"></span></p>
+					<p id="inverse">Inverse: <span></span></p>
+					<p>Domain: <span id="domain"></span></p>
+					<p>Range: <span id="range"></span></p>
+					<p>Subprop.: <span id="subproperties"></span></p>
+					<p>Superprop.: <span id="superproperties"></span></p>
+					<p>Equiv.: <span id="propEquivUri"></span></p>
+					<p id="infoCardinality">Cardinality: <span></span></p>
+					<p id="minCardinality">Min. cardinality: <span></span></p>
+					<p id="maxCardinality">Max. cardinality: <span></span></p>
+					<p>Charac.: <span id="propAttributes"></span></p>
+					<p>Description: <span id="propDescription"></span></p>
+					<p>Comment: <span id="propComment"></span></p>
+				</div>
+				<div id="noSelectionInformation">
+					<p><span>Select an element in the visualization.</span></p>
+				</div>
+			</div>
+		</section>
+	</aside>
+</main>
+
+<script src="http://code.jquery.com/jquery-2.1.4.js"></script>
+<script src="js/d3.min.js"></script>
+<script src="js/webvowl.js"></script>
+<script src="js/webvowl.app.js"></script>
+
+
+<script>
+	var appp = webvowl.app(); //'#class15'
+
+	$(document).ready(function () {
+		appp.initialize();
+		appp.setClickPositionFunction(nodeClicked);
+	});
+
+	function nodeClicked( node ) {
+		console.log("the node: ", node );
+		appp.move( node.x, node.y );
+	};
+
+	function test() {
+		alert("Hola.");
+		$.ajax({
+			type: "POST",
+			url: "http://localhost/mapon/index.php/mappingspace/getvowl/64",
+			success: function( data ) {
+				console.log("Vowl");
+				var jsson = JSON.parse(data);
+				console.log(jsson);
+				appp.loadVowlFile(data);
+			}
+		});
+	}
+</script>
+<a onclick="test();">Buttoooon</a>
+
+</body>
+</html>

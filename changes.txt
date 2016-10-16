@@ -1,0 +1,24 @@
+
+
+2014-12-05 
+
+- R2RML Oracle compatibility
+
+- Create data source (introduce .sql file) (mysql, oracle....)
+- Edit/update data sources ?
+
+- Load / Remove / update ontologies
+- edit mapping space
+
+- In mappingspace, focus Mapping (right side) when a class is hover.
+
+- Issues with graph layout when the data base is big (filtering classes)
+
+	- graph layout -> fix columns on drag with the mouse
+
+
+- Small help
+- test with other OBDA examples
+
+
+- R2RML compatibility 

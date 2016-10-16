@@ -1,0 +1,7 @@
+.idea
+**/webvowl/node_modules/*
+**/webvowl/deploy/*
+**/public/webvowl_deploy/*
+**/node_modules/*
+upload/
+download/

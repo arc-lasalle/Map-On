@@ -1,0 +1,89 @@
+
+/*--- Old label colors ---*/
+
+.ui.black.label {
+    background-color: #1b1c1d !important;
+    border-color: #1b1c1d !important;
+}
+
+.ui.blue.label {
+    background-color: #3b83c0 !important;
+    border-color: #3b83c0 !important;
+}
+
+.ui.green.label {
+    background-color: #A1CF64 !important;
+    border-color: #A1CF64 !important;
+}
+
+.ui.orange.label {
+    background-color: #F05940 !important;
+    border-color: #F05940 !important;
+}
+
+.ui.pink.label {
+    background-color: #d9499a !important;
+    border-color: #d9499a !important;
+}
+
+.ui.purple.label {
+    background-color: #564f8a !important;
+    border-color: #564f8a !important;
+}
+
+.ui.red.label {
+    background-color: #d95c5c !important;
+    border-color: #d95c5c !important;
+}
+
+.ui.teal.label {
+    background-color: #00b5ad !important;
+    border-color: #00b5ad !important;
+}
+
+.ui.yellow.label {
+    background-color: #f2c61f !important;
+    border-color: #f2c61f !important;
+}
+
+/*--- Old icon colors ---*/
+
+i.white.icon {
+    color: #ffffff !important;
+}
+
+i.black.icon {
+    color: #1b1c1d !important;
+}
+
+i.blue.icon {
+    color: #3b83c0 !important;
+}
+
+i.green.icon {
+    color: #A1CF64 !important;
+}
+
+i.orange.icon {
+    color: #F05940 !important;
+}
+
+i.pink.icon {
+    color: #d9499a !important;
+}
+
+i.purple.icon {
+    color: #564f8a !important;
+}
+
+i.red.icon {
+    color: #d95c5c !important;
+}
+
+i.teal.icon {
+    color: #00b5ad !important;
+}
+
+i.yellow.icon {
+    color: #f2c61f !important;
+}

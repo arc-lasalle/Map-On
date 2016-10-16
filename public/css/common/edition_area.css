@@ -1,0 +1,25 @@
+.ea_search_box {
+    display: none;
+    position: fixed;
+    min-width: 310px;
+    max-height: 400px;
+    background-color: white;
+    overflow: auto;
+    border:1px solid #ccc;
+    font-size:10px;
+    font-family:Verdana, Geneva, Arial, Helvetica, sans-serif;
+    padding:7px;
+    z-index:20;
+    text-align: left;
+    line-height: 1.4em;
+}
+
+#ea_loader {
+    position: absolute;
+    margin-top: 100px;
+    margin-left: 45%;
+    background-color: black;
+    color: white;
+    text-align: center;
+    padding: 5px;
+}

@@ -1,0 +1,72 @@
+/* Tooltips that appear when mouse is over node (in rgraph). This tooltip contain information about the class  */
+.tip {
+    color: #111;
+    width: 139px;
+    max-width: 350px;
+    background-color: white;
+    border:1px solid #ccc;
+    opacity:0.9;
+    filter:alpha(opacity=90);
+    font-size:10px;
+    font-family:Verdana, Geneva, Arial, Helvetica, sans-serif;
+    padding:7px;
+	line-height: 1.3em;
+}
+
+
+/* 
+Title Styles for the view that apper when rgraph and indented list use these parameters:
+annot_onto_div_id 
+annot_class_div_id 
+annot_relat_div_id 
+*/
+.annotation_title{
+    font-size:16px;
+    font-weight:bold;
+}
+
+/*
+Box Styles for the view that apper when rgraph and indented list use these parameters:
+annot_onto_div_id 
+annot_class_div_id 
+annot_relat_div_id 
+*/
+.annotation_box{
+    width:300px;
+    /*height:85px;*/
+    height:110px;
+    font-size:11px;
+    overflow:auto;
+    padding: 5px 10px;
+}
+
+/* Tooltips styles for the suggestions of the search box */
+.search_box{
+    display: none;
+    position: absolute;
+    width: 300px;
+    background-color: white;
+    border:1px solid #ccc;
+    opacity:0.98;
+    filter:alpha(opacity=98);
+    font-size:10px;
+    font-family:Verdana, Geneva, Arial, Helvetica, sans-serif;
+    padding:7px;
+    z-index:2; 
+    text-align: left;
+	line-height: 1.6em;
+}
+
+.search_box_emdatatypes{
+    display: none;
+    position: absolute;
+    width: 300px;
+    background-color: white;
+    border:1px solid #ccc;
+    font-size:10px;
+    font-family:Verdana, Geneva, Arial, Helvetica, sans-serif;
+    padding:7px;
+    z-index:2; 
+    text-align: left;
+	line-height: 1.2em;
+}

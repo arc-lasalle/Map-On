@@ -1,0 +1,99 @@
+/*-----------------------------------------------------------------
+ VOWL graphical elements (part of spec) - mixed CSS and SVG styles
+-----------------------------------------------------------------*/
+
+/*-------- Text --------*/
+.vowlGraph .text {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 12px;
+}
+.vowlGraph .subtext {
+    font-size: 9px;
+}
+.vowlGraph .text.instance-count {
+    fill: #666;
+}
+.vowlGraph .external + text .instance-count {
+    fill: #aaa;
+}
+.vowlGraph .cardinality {
+    font-size: 10px;
+}
+.vowlGraph .text, .vowlGraph .embedded {
+    pointer-events: none;
+}
+
+/*------- Colors ------*/
+.vowlGraph .class, .vowlGraph .object, .vowlGraph .disjoint, .vowlGraph .objectproperty, .vowlGraph .disjointwith, .vowlGraph .equivalentproperty, .vowlGraph .transitiveproperty, .vowlGraph .functionalproperty, .vowlGraph .inversefunctionalproperty, .vowlGraph .symmetricproperty {
+    fill: #acf;
+}
+.vowlGraph .label .datatype, .vowlGraph .datatypeproperty {
+    fill: #9c6;
+}
+.vowlGraph .rdf, .vowlGraph .rdfproperty {
+    fill: #c9c;
+}
+.vowlGraph .literal, .vowlGraph .node .datatype {
+    fill: #fc3;
+}
+.vowlGraph .deprecated, .vowlGraph .deprecatedproperty {
+    fill: #ccc;
+}
+.vowlGraph .external, .vowlGraph .externalproperty {
+    fill: #36c;
+}
+.vowlGraph path, .vowlGraph .nofill {
+    fill: none;
+}
+.vowlGraph .symbol {
+    fill: #69c;
+}
+.vowlGraph .arrowhead, .vowlGraph marker path {
+    fill: #000;
+}
+.vowlGraph .class, .vowlGraph path, .vowlGraph line, .vowlGraph .fineline {
+    stroke: #000;
+}
+.vowlGraph .white, .vowlGraph .subclass, .vowlGraph .dottedMarker path, .vowlGraph .subclassproperty, .vowlGraph .external + text {
+    fill: #fff;
+}
+.vowlGraph .class.hovered, .vowlGraph .property.hovered, .vowlGraph path.arrowhead.hovered, .vowlGraph .cardinality.hovered, .vowlGraph .normalMarker path.hovered, .vowlGraph .cardinality.focused, .vowlGraph .normalMarker path.focused, .vowlGraph circle.pin {
+    fill: #f00;
+    cursor: pointer;
+}
+.vowlGraph .focused, .vowlGraph path.hovered {
+    stroke: #f00;
+}
+.vowlGraph .label .indirectHighlighting, .vowlGraph .feature:hover {
+    fill: #f90;
+}
+
+/*------- Strokes ------*/
+.vowlGraph .class, .vowlGraph path, .vowlGraph line {
+    stroke-width: 2;
+}
+.vowlGraph .fineline {
+    stroke-width: 1;
+}
+.vowlGraph .special {
+    stroke-dasharray: 8;
+}
+.vowlGraph .dotted {
+    stroke-dasharray: 3;
+}
+.vowlGraph rect.focused, .vowlGraph circle.focused {
+    stroke-width: 4px;
+}
+.vowlGraph .nostroke {
+    stroke: none;
+}
+
+/*-----------------------------------------------------------------
+ Additional elements for the WebVOWL demo (NOT part of spec)
+-----------------------------------------------------------------*/
+
+.vowlGraph marker path {
+    /* Safari and Chrome workaround for inheriting the style of its link.
+       Use any value that is larger than the length of the marker path. */
+    stroke-dasharray: 50;
+}
