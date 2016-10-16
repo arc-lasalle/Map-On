@@ -18,6 +18,7 @@ The Map-On features:
 -	Pop-ups with tips as an integrated help.
 
 http://semanco-tools.eu/map-on
+
 http://arc.salleurl.edu/
 
 Copyright (C) 2016 ARC Engineering and Architecture La Salle, Ramon Llull University.
