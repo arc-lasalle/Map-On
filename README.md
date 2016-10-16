@@ -21,6 +21,15 @@ http://semanco-tools.eu/map-on
 
 http://arc.salleurl.edu/
 
+Map-On tool has been developed in PHP using the framework Code Igniter. The graphical ontology representation has been implement using the VivaGraphJS library and ARC to parse RDF files. The mapping file generated is written in the R2RML Mapping Language.
+
+- CodeIgniter, Open source PHP web application framework – http://codeigniter.com
+- Graph drawing library for JavaScript – https://github.com/anvaka/VivaGraphJS
+- Text editor implemented in JavaScript with turtle syntax style – http://codemirror.net/
+- ARC, Appmosphere RDF classes – https://github.com/semsol/arc2/wiki
+- R2RML: RDB to RDF Mapping Language – http://www.w3.org/TR/r2rml/
+
+
 Copyright (C) 2016 ARC Engineering and Architecture La Salle, Ramon Llull University.
  
 for comments please contact Alvaro Sicilia (ascilia@salleurl.edu)
