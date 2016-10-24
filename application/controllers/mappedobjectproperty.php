@@ -16,7 +16,9 @@ class Mappedobjectproperty extends CI_Controller {
 		$this->load->model("Mapping_model", "mapping");
 		$this->load->model("Datasource_model", "datasource");	
 		$this->load->model("Mappingspace_model", "mappingspace");
-		$this->load->model("Log_model", "log");
+
+		$this->load->model("workspaces_model", "workspaces_model");
+		//$this->load->model("Log_model", "mapon_log");
 
 	}
 		
@@ -29,6 +31,8 @@ class Mappedobjectproperty extends CI_Controller {
 		if (!$this->ion_auth->logged_in()){
 			redirect('auth/login', 'refresh');
 		}
+
+		$this->maponrouting->set($datasource_id, $mappingspace_id, $mappedclassdomain_id);
 		
 		$data["datasource_id"] = $datasource_id;
 		$data["mappingspace_id"] = $mappingspace_id;
@@ -37,10 +41,12 @@ class Mappedobjectproperty extends CI_Controller {
 		$row = $this->mappedclass->getMappedclass($mappedclassdomain_id);
 
 		$data["uriMappedClass"] = (count($row) > 0) ? $row[0]->class: "";		
-		$data["mappedtablecolumn"] = (count($row) > 0) ? $row[0]->mappedtablecolumn: "";		
-		
-		
-		$data["graph"] = $this->graph($datasource_id, $mappingspace_id, $row[0], true);
+		$data["mappedtablecolumn"] = (count($row) > 0) ? $row[0]->mappedtablecolumn: "";
+
+		$graphData["mapping_graph"] = $this->_getGraphData($datasource_id, $mappingspace_id, $row[0] );
+		$graphData["routes"] = $this->maponrouting->get();
+		$data["graph"] = $this->load->view('mappedobjectproperty/graph', $graphData, true);
+		//$data["graph"] = $this->graph($datasource_id, $mappingspace_id, $row[0], true);
 
 		
 		//////////////////////////////////
@@ -101,7 +107,7 @@ class Mappedobjectproperty extends CI_Controller {
 
 			$sql = $this->mapping->generateSQL($input_table, $mappedclassdomain_id, $datasource_id);
 			
-			$uri = $this->mapping->generateURI($targetQname, $input_table, $basic_uri, $ontology_id); 
+			$uri = $this->mapping->generateURI($datasource_id, $targetQname, $input_table, $basic_uri, $ontology_id); 
 		
 			$class = $this->prefix->getURI($targetQname, $ontology_id);
 			
@@ -111,11 +117,12 @@ class Mappedobjectproperty extends CI_Controller {
 		$objectproperty = $this->prefix->getURI($objectproperty, $ontology_id);
 		$mappingspaceid = $this->mappedobjectproperty->add($objectproperty, $uri, $mappedclassdomain_id, $mappedclassrange_id);
 		
-		$this->log->write("Object property created: <strong>".$this->input->post('input_objectproperty')."</strong>", "new", "mappingspace", $mappingspace_id);
-		$this->log->write("Object property created: <strong>".$this->input->post('input_objectproperty')."</strong>", "new", "mappedclass", $mappedclassdomain_id);
-		$this->log->write("Object property created: <strong>".$this->input->post('input_objectproperty')."</strong>", "new", "mappedclass", $mappedclassrange_id);
-		
-	
+		//$this->mapon_log->write("Object property created: <strong>".$this->input->post('input_objectproperty')."</strong>", "new", "mappingspace", $mappingspace_id);
+		//$this->mapon_log->write("Object property created: <strong>".$this->input->post('input_objectproperty')."</strong>", "new", "mappedclass", $mappedclassdomain_id);
+		//$this->mapon_log->write("Object property created: <strong>".$this->input->post('input_objectproperty')."</strong>", "new", "mappedclass", $mappedclassrange_id);
+		$this->maponlog->add( "new", "Object property created: <strong>".$this->input->post('input_objectproperty')."</strong>" );
+
+
 
 		//////
 		// Once the new object property is added, we are going to re-generate the SQL for the domain class, it might be changed.
@@ -128,7 +135,7 @@ class Mappedobjectproperty extends CI_Controller {
 		redirect('/mappingspace/graph/'.$datasource_id.'/'.$mappingspace_id);
 	}
 	
-	
+	/*
 	public function graph($datasource_id, $mappingspace_id, $mappedclass, $toText = false)
 	{
 		$datalist = $this->datasource->getDatasource($datasource_id);
@@ -222,10 +229,68 @@ class Mappedobjectproperty extends CI_Controller {
 			return $this->load->view('mappedobjectproperty/graph', $data, true);
 		}
 	}
-	
-	
-	
-	
+*/
+	public function _getGraphData($datasource_id, $mappingspace_id, $mappedclass )
+	{
+		$ontology_id = $this->datasource->getDatasource($datasource_id)[0]->ontology_id;
+
+		// LAYOUT
+		$layout = array();
+		$mappingSpaceLayout = $this->mappedclass->getLayout( $mappedclass->id );
+		foreach( $mappingSpaceLayout as $row ) $layout[strtolower($row->nodeid)] = $row;
+
+		// ONTOLOGY - CLASSES with ObjectProperties and DataProperties.
+		$store_Mysql = $this->workspaces_model->connect_workspace("ontology_".$ontology_id);
+		$annot = $this->ontology->getAnnotationbyClass($store_Mysql, $mappedclass->class);
+
+		//$class = new stdClass();
+		$class = $mappedclass;
+		$class->description = (count($annot) > 0) ? $annot[0]["comment"]: "";
+		$class->uri = $mappedclass->class;
+		$class->qname = $this->prefix->getQName($mappedclass->class, $ontology_id);
+
+		$qn = strtolower($class->qname);
+		if ( isset($layout[ $qn ]) ) {
+			$class->layoutX = $layout[ $qn ]->layoutX;
+			$class->layoutY = $layout[ $qn ]->layoutY;
+		}
+
+		// Link Class with Table
+		$class->tableLink = "";
+
+		$arr = explode ( "->", $class->mappedtablecolumn );
+
+		if( count($arr) == 2 ) {
+			$class->tableLink = $arr[0]."_".$arr[1];
+			$enabled_tables[] = strtolower( $arr[0] ); //to know if a table has been mapped or not.
+		}
+
+		//$sqlTables = $this->getTablesfromSQL( $class->sql );
+		//foreach( $sqlTables as $table ) $enabled_tables[] = strtolower($table);
+
+
+		$data["classes"][] = $class;
+
+
+		// DATASOURCE - TABLES & COLUMNS
+
+		$data["tables"] = $this->datasource->getTableTree( $datasource_id );
+
+		$enabledTables = $this->mappedclass->getTableson( $mappedclass->id, true );
+
+		$enabled_tables = [];
+		foreach( $enabledTables as $row ) $enabled_tables[] = strtolower($row->tableid);
+
+		foreach( $data["tables"] as $table ) {
+			$table->enabled = in_array( strtolower( $table->name ), $enabled_tables);
+		}
+
+
+		return $data;
+	}
+
+
+
 	public function delete($datasource_id, $mappingspace_id, $id)
 	{		
 	
@@ -239,11 +304,12 @@ class Mappedobjectproperty extends CI_Controller {
 			redirect('/mappingspace/graph/'.$datasource_id.'/'.$mappingspace_id);
 		}
 		
-		$this->log->write("Object property deleted: <strong>".$from."</strong>", "delete", "mappingspace", $mappingspace_id);
-		$this->log->write("Object property deleted: <strong>".$from."</strong>", "delete", "mappedclass", $row->mappedclassdomain_id);
-		$this->log->write("Object property deleted: <strong>".$from."</strong>", "delete", "mappedclass", $row->mappedclassrange_id);
-		
-		
+		//$this->mapon_log->write("Object property deleted: <strong>".$from."</strong>", "delete", "mappingspace", $mappingspace_id);
+		//$this->mapon_log->write("Object property deleted: <strong>".$from."</strong>", "delete", "mappedclass", $row->mappedclassdomain_id);
+		//$this->mapon_log->write("Object property deleted: <strong>".$from."</strong>", "delete", "mappedclass", $row->mappedclassrange_id);
+		$this->maponlog->add( "delete", "Object property deleted: <strong>".$from."</strong>" );
+
+
 		$this->mappedobjectproperty->delete($id);
 		
 		redirect('/mappingspace/graph/'.$datasource_id.'/'.$mappingspace_id);

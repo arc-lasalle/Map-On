@@ -3,8 +3,8 @@
  * ARC2 base class
  *
  * @author Benjamin Nowack
- * @license <http://arc.semsol.org/license>
- * @homepage <http://arc.semsol.org/>
+ * @license W3C Software License and GPL
+ * @homepage <https://github.com/semsol/arc2>
  * @package ARC2
  */
 
@@ -75,7 +75,9 @@ class ARC2_Class {
 
   function deCamelCase($v, $uc_first = 0) {
     $r = str_replace('_', ' ', $v);
-    $r = preg_replace('/([a-z0-9])([A-Z])/e', '"\\1 " . strtolower("\\2")', $r);
+    $r = preg_replace_callback('/([a-z0-9])([A-Z])/', function($matches) {
+      return $matches[1] . ' ' . strtolower($matches[2]);
+    }, $r);
     return $uc_first ? ucfirst($r) : $r;
   }
 
@@ -92,7 +94,7 @@ class ARC2_Class {
     /* decode apostrophe + s */
     $r = str_replace(' apostrophes ', "'s ", $r);
     /* typical RDF non-info URI */
-    if (($loops < 1) && preg_match('/^(self|it|this|me)$/i', $r)) {
+    if (($loops < 1) && preg_match('/^(self|it|this|me|id)$/i', $r)) {
       return $this->extractTermLabel(preg_replace('/\#.+$/', '', $uri), $loops + 1);
     }
     /* trailing hash or slash */
@@ -191,6 +193,12 @@ class ARC2_Class {
     return $this->ns[$m[1]];
   }
 
+  function setPrefix($prefix, $ns) {
+	 $this->ns[$prefix] = $ns;
+	 $this->nsp[$ns] = $prefix;
+	 return $this;
+  }
+  
   function getPrefix($ns) {
     if (!isset($this->nsp[$ns])) {
       $this->ns['ns' . $this->ns_count] = $ns;
@@ -476,7 +484,7 @@ class ARC2_Class {
 
   function queryDB($sql, $con, $log_errors = 0) {
     $t1 = ARC2::mtime();
-    $r = mysql_query($sql, $con);
+    $r = mysqli_query( $con, $sql);
     if (0) {
       $t2 = ARC2::mtime() - $t1;
       $call_obj = $this;
@@ -487,7 +495,8 @@ class ARC2_Class {
       }
       echo "\n" . $call_path . " needed " . $t2 . ' secs for ' . str_replace("\n" , ' ', $sql);;
     }
-    if ($log_errors && ($er = mysql_error($con))) $this->addError($er);
+    $er = mysqli_error($con);
+    if ($log_errors && !empty($er)) $this->addError($er);
     return $r;
   }
 

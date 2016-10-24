@@ -14,9 +14,9 @@ class R2rml_model extends CI_Model
 	
 	function getR2RMLPart($datasource_id)
 	{
-		$this->db->where('datasource_id', $datasource_id);
+		$this->team->db->where('datasource_id', $datasource_id);
 
-		$query = $this->db->get("r2rmlparts");
+		$query = $this->team->db->get("r2rmlparts");
 		$ret = "";
 		if(count($query->result()) > 0 ) {
 			$rows = $query->result();
@@ -28,17 +28,17 @@ class R2rml_model extends CI_Model
 	
 	function updateR2RMLPart($input_r2rmlpart, $user_id, $datasource_id)
 	{
-		$this->db->where('datasource_id', $datasource_id);
+		$this->team->db->where('datasource_id', $datasource_id);
 
-		$query = $this->db->get("r2rmlparts");
+		$query = $this->team->db->get("r2rmlparts");
 		
 		if(count($query->result()) > 0 ) {
 			$rows = $query->result();
 			
-			$this->db->where('id', $rows[0]->id);
-			$this->db->update('r2rmlparts', array('text' => $input_r2rmlpart,'user_id' => $user_id,'datasource_id' => $datasource_id, 'date' => date("Y-m-d")));
+			$this->team->db->where('id', $rows[0]->id);
+			$this->team->db->update('r2rmlparts', array('text' => $input_r2rmlpart,'user_id' => $user_id,'datasource_id' => $datasource_id, 'date' => date("Y-m-d")));
 		} else {
-			$this->db->insert('r2rmlparts', array('text' => $input_r2rmlpart,'user_id' => $user_id,'datasource_id' => $datasource_id, 'date' => date("Y-m-d")));
+			$this->team->db->insert('r2rmlparts', array('text' => $input_r2rmlpart,'user_id' => $user_id,'datasource_id' => $datasource_id, 'date' => date("Y-m-d")));
 		}
 
 	}
@@ -50,7 +50,9 @@ class R2rml_model extends CI_Model
 //		echo "Exporting data source: ".$datasource_id."<br><br>";
 		
 		///Version 1. All mapped clases of all mapping spaces are exported. No overlappings are checked
-
+		$db_type = "mysql";
+		$datasource = $this->datasource->getDatasource( $datasource_id );
+		if ( isset($datasource[0]->type) ) $db_type = $datasource[0]->type;
 
 
 		$outputText = "";
@@ -71,7 +73,7 @@ class R2rml_model extends CI_Model
 				$dataproperties = $this->mappeddataproperty->getMappeddataproperties($class->id);
 				$objectproperties = $this->mappedobjectproperty->getMappedobjectproperties($class->id);
 
-				$outputText = $outputText.$this->generateR2RMLClass($class, $dataproperties, $objectproperties);
+				$outputText = $outputText.$this->generateR2RMLClass($db_type, $class, $dataproperties, $objectproperties);
 			}
 		}
 		
@@ -81,14 +83,19 @@ class R2rml_model extends CI_Model
 	///////////////////////////////////////
 	// This function generates the R2RML output of a class
 
-	function generateR2RMLClass( $map, $dataproperties, $objectproperties )
+	function generateR2RMLClass( $db_type, $map, $dataproperties, $objectproperties )
 	{
 		$ret = "\n\n";
 		$ret .= "################################################\n";
 		$ret .= "# TripleMap for ".$map->id.": ".$map->class."\n\n";
 		
 		$ret .= "<mapping1_".$map->id."> a rr:TriplesMap;\n";
-		$ret .= "	rr:logicalTable [ rr:sqlQuery \"".addslashes($map->sql)."\" ];\n";
+		if ( $db_type == 'cvs' ) {
+			$ret .= "	rr:logicalTable [ rr:tableName \"".addslashes($map->sql)."\" ];\n";
+		} else {
+			$ret .= "	rr:logicalTable [ rr:sqlQuery \"".addslashes($map->sql)."\" ];\n";
+		}
+
 
 		$ret .= "	rr:subjectMap [	rr:template \"".addslashes($map->uri)."\";\n";
 		$ret .= "			rr:class <".$map->class.">\n";

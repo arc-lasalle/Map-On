@@ -11,692 +11,8 @@
 	<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>/public/css/external/dbgraph/wwwsqldesigner.css" />
 
 
-    <script type="text/javascript">
-
-		$('#ea_loader').removeClass('hidden');
-		$('#ea_loader').html("Loading mappings...<br>&#8635;");
-
-        function main () {
-            // This demo shows how to create a directional arrow in SVG renderer.
-            // Though it might seem wordy it's due to SVG specific operations.
-            // The library has minimal SVG manipulation support.
-            // Maybe in future some of the following technniques will become part
-            // of the library itself...
-            var graph = Viva.Graph.graph();
-			//
-			/////////////////////////////////////////////////////////////////
-			/////////////////////////////////////////////////////////////////
-			
-			var idealLength = 300;
-            var graphics = Viva.Graph.View.svgGraphics(),
-                nodeSize = 10;
-			var layout = Viva.Graph.Layout.forceDirected(graph, {
-				/*springLength : 100,
-				springCoeff : 0.0005,
-				dragCoeff : 0.02,
-				gravity : -2.2
-				*/
-				springLength : idealLength,
-				springCoeff : 0.0008,
-				dragCoeff : 0.02,
-				gravity : -10,
-				
-				springTransform: function (link, spring) {
-                    spring.length = idealLength * (1 - link.data.connectionStrength);
-                  }
-			});
-
-			<?php
-			
-			//Tables and attributes
-			$tableCount = count($mapTables);
-			$width=600;
-			$offset = $width/($tableCount+1);
-			$i = 0;
-			
-			foreach($tables as $row) {
-
-				if(array_key_exists(strtolower($row->name), $mapTables)) {
-					echo "nodeTable = graph.addNode('".strtolower($row->name)."', {text: '".$row->name."', type:2, isPinned: true});\n";
-					
-					if(array_key_exists(strtolower($row->name), $layout)) {
-						$posx = $layout[strtolower($row->name)]["layoutX"];
-						$posy = $layout[strtolower($row->name)]["layoutY"];
-					} else {
-						$posx = -$width/2 + ($i+1)*$offset;
-						$posy = $i%2 == 0 ? 120 : 220;
-					} 
-					//Positioning the nodes
-					echo "layout.setNodePosition(nodeTable, ".$posx.", ".$posy.");";
-					
-					$i++;
-					
-					foreach($columns[$row->id] as $col) {
-
-						$type = ($col->foreignkey == "") ? 3: 5;
-						
-						if(array_key_exists(strtolower($row->name."_".$col->name), $layout)) {
-							echo "nodeCol = graph.addNode('".strtolower($row->name."_".$col->name)."', {text: '".$col->name."', type:".$type.", description: '".$col->type."', isPinned: true});\n";
-							$posx = $layout[strtolower($row->name."_".$col->name)]["layoutX"];
-							$posy = $layout[strtolower($row->name."_".$col->name)]["layoutY"];
-							echo "layout.setNodePosition(nodeCol, ".$posx.", ".$posy.");";
-						} else {
-							echo "nodeCol = graph.addNode('".strtolower($row->name."_".$col->name)."', {text: '".$col->name."', type:".$type.", description: '".$col->type."'});\n";
-						} 
-						
-						//Positioning the nodes
-						echo "graph.addLink('".strtolower($row->name)."', '".strtolower($row->name."_".$col->name)."', { connectionStrength: 0.9, type: 2, label:''});\n\n";
-					}
-				}
-			}
-			
-			//foreign keys
-			foreach($tables as $row) {
-
-				if(array_key_exists(strtolower($row->name), $mapTables)) {
-					foreach($columns[$row->id] as $col) {
-						
-						if($col->foreignkey != "" && $col->foreigntable != "") {
-							if(array_key_exists(strtolower($col->foreigntable), $mapTables)) {
-								echo "graph.addLink('".strtolower($col->foreigntable."_".$col->foreignkey)."', '".strtolower($row->name."_".$col->name)."', { connectionStrength: 0.7, type: 5, label:''});\n\n";
-							}
-						}
-						
-						//echo "graph.addLink('".$row->name."', '".$row->name."_".$col->name."', { connectionStrength: 0.9, type: 2});\n\n";
-
-					}
-				}
-			}
-			$i = 0;
-			if(count($mclasses) > 0)
-				$offset = $width/(count($mclasses));
-			else
-				$offset = 1;
-			
-			//Classes  
-			$mapClasses = array();
-			foreach($mclasses as $row) {
-				if(!array_key_exists($row->class, $mapClasses)) {
-					$mapClasses[$row->class] = 1;
-
-					if(array_key_exists($row->class, $layout)) {
-						echo "node = graph.addNode('".$row->class."', {text: '".$row->class."', type:1, isPinned: true, id:".$row->id.", description:'".str_replace("'", "",str_replace("\n", ' ', $mappedclassDescription[$row->id]))."'});\n";
-						echo "layout.setNodePosition(node, ".$layout[$row->class]["layoutX"].", ".$layout[$row->class]["layoutY"].");";		
-					} else {
-						echo "node = graph.addNode('".$row->class."', {text: '".$row->class."', type:1, isPinned: true, id:".$row->id.", description:'".str_replace("'", "",str_replace("\n", ' ', $mappedclassDescription[$row->id]))."'});\n";
-						$posx = -$width/2 + ($i+1)*$offset;
-						$posy = $i%2 == 0 ? -120 : -220;
-						echo "layout.setNodePosition(node, ".$posx.", ".$posy.");";
-						//echo "layout.setNodePosition(node, 0, -200);";
-					}
-					$i++;
-				}
-			}
-
-			//Data properties
-			foreach($datapropertiesList as $key => $row) {
-					
-				if(array_key_exists($row, $layout)) {
-					echo "node = graph.addNode('".$row."', {text: '".$row."', type:4, isPinned: true, mappedclass_id:".$mc_id[$key].", dataproperty_id:".$dp_id[$key]."});\n";
-					$posx = $layout[$row]["layoutX"];
-					$posy = $layout[$row]["layoutY"];
-
-					echo "layout.setNodePosition(node, ".$posx.", ".$posy.");";
-				} else {
-					echo "node = graph.addNode('".$row."', {text: '".$row."', type:4, mappedclass_id:".$mc_id[$key].", dataproperty_id:".$dp_id[$key]."});\n";
-				} 
-			}
-
-			//Object & data & mappings properties		
-			foreach($mclasses as $row) {
-
-				//Object
-				foreach($objectproperties[$row->id] as $objp) {
-	            	echo "if (graph.getNode('".$objp->target."'))";
-					echo "	graph.addLink('".$row->class."', '".$objp->target."', { connectionStrength: 0.65, type: 1, label:'".$objp->objectproperty."'});\n\n";
-				}
-				
-				//Data properties
-				foreach($dataproperties[$row->id] as $objp) {
-					echo "if (graph.getNode('".$objp->dataproperty."'))";
-					echo "	graph.addLink('".$row->class."', '".$objp->dataproperty."', { connectionStrength: 0.7, type: 4, label:''});\n\n";
-				}
-
-				//Mappings
-				if($mappings[$row->id] != "") {
-					echo "if (graph.getNode('".strtolower($mappings[$row->id])."'))";
-					echo "	graph.addLink('".$row->class."', '".strtolower($mappings[$row->id])."', { connectionStrength: 0.1 , type: 3, label:''});\n\n";
-				}
-
-			}
-			
-			foreach($mappingsDP as $row) {
-				echo "if (graph.getNode('".strtolower($row[1])."'))";
-				echo "	graph.addLink('".$row[0]."', '".strtolower($row[1])."', { connectionStrength: 0.1, type: 3, label:''});\n\n";
-			}
-			?>
-
-            // In this example we fire off renderer before anything is added to
-            // the graph:
-            var renderer = Viva.Graph.View.renderer(graph, {
-                     container  : document.getElementById('graphDiv'),
-					 graphics : graphics, layout : layout
-                });
-           
-            graphics.node(function(node) {
-				// This time it's a group of elements: http://www.w3.org/TR/SVG/struct.html#Groups
-			    var ui = Viva.Graph.svg('g'),
-                // Create SVG text element with user id as content
-               
-				svgText = Viva.Graph.svg('text')
-					//.attr('onclick', 'alert("ssd");')
-					.attr('y', 8)
-					.attr('x', 5)
-					.attr('cursor', 'pointer')
-					.attr('class', 'text-link')
-					.attr('font-size', '9')
-					.attr('font-weight', 'normal')
-				
-					.text(node.data.text),					
-				bckgr = Viva.Graph.svg('rect')
-                     .attr('width', nodeSize)
-                     .attr('height', nodeSize+4)
-					 .attr('y', -2)
-					 .attr('id', 'background'+node.id);
-							
-				if(node.data.type === 1) {
-					//Class
-					bckgr.attr('style', 'fill:rgb(240,89,64)')		//naranja 204,159,42
-						 .attr('rx', 7)
-						 .attr('ry', 7)
-					svgText.attr('style', 'fill:rgb(256,256,256)');
-					
-					svgTitle = Viva.Graph.svg('title')
-						.text(node.data.description);
-					ui.append(svgTitle);
-        
-				} else if(node.data.type === 2) {
-					//Table
-					bckgr.attr('style', 'fill:rgb(89,79,138)');		//marron: 150,111,72
-					svgText.attr('style', 'fill:rgb(256,256,256)');
-					/*
-					tableBox = Viva.Graph.svg('rect')
-                     .attr('width', 10)
-                     .attr('height', 10)
-					 .attr('y', -2)
-					 .attr('fill-opacity', 0.0)
-					 .attr('stroke', 'rgb(156,156,156)')
-					 .attr('stroke-width', 1)
-                     .attr('stroke-dasharray', '2, 1')
-					 .attr('id', 'tableBox'+node.id);
-					 
-					ui.append(tableBox);	
-					ui.tableBox	= tableBox;*/
-					
-				} else if(node.data.type === 3) {
-					//Table Column
-					bckgr.attr('style', 'fill:rgb(89,79,138); opacity:0.8'); //marron: 150,111,7
-					svgText.attr('style', 'fill:rgb(256,256,256)');
-					
-					svgDescription = Viva.Graph.svg('text')
-					//.attr('onclick', 'alert("ssd");')
-					.attr('y', 25)
-					.attr('x', 2)
-					.attr('class', 'text-link')
-					.attr('font-size', '12')
-					.attr('visibility', 'hidden')
-					.text(node.data.description);
-					ui.append(svgDescription);
-					ui.svgDescription = svgDescription;
-					
-				} else if(node.data.type === 4) {
-					//data property
-					bckgr.attr('style', 'fill:rgb(161,207,100); opacity:0.8')	//green: 41,166,121
-						 .attr('rx', 7)
-						 .attr('ry', 7)
-					svgText.attr('style', 'fill:rgb(256,256,256)');
-				} else if(node.data.type === 5) {
-					//table column with a foreign key
-					bckgr.attr('style', 'fill:rgb(89,79,138); opacity:0.8') //marron: 150,111,7
-						.attr('stroke', 'rgb(256,40,40)')
-						.attr('stroke-width', 0.1);
-					svgText.attr('style', 'fill:rgb(256,256,256)');
-					
-					svgDescription = Viva.Graph.svg('text')
-					//.attr('onclick', 'alert("ssd");')
-					.attr('y', 25)
-					.attr('x', 2)
-					.attr('class', 'text-link')
-					.attr('font-size', '12')
-					.attr('visibility', 'hidden')
-					.text(node.data.description);
-					ui.append(svgDescription);
-					ui.svgDescription = svgDescription;
-				} 
-			
-				ui.data = node.data;
-				ui.append(bckgr);
-				ui.append(svgText);
-				ui.bckgr = bckgr;
-				ui.svgText = svgText;
-				ui.nodeId = node.id;
-				
-				 ui.addEventListener('click', function (e) {
-                        // toggle pinned mode
-                        layout.pinNode(node, true);
-                    });
-				$(ui).mousedown( function(e) {
-					showMenu(node, e);
-				});
-				$(ui).mouseup(function(e) {
-					showMenu(node, e);
-					handleMouseUp(e, node);
-				}).hover(function() {
-					
-						if(node.data.type === 1){
-								
-							hoverLabelClass(node.id, '');
-											
-							offset = $('#viewbox_'+node.id.replace(":", "--")).position().top;
-
-							contactTopPosition =offset +  $("#listMappedClasses").scrollTop() -60;
-							$("#listMappedClasses").animate({scrollTop: contactTopPosition});
-						}
-                        handleMouseOverNode(node);
-                    },
-                    function(){
-                    	if(node.data.type === 1){
-                    		document.getElementById('viewbox_'+node.id.replace(":", "--")).style.backgroundColor = '#faf9fa';
-                    	}
-                        handleMouseLeaveNode(node);
-                    });
-					
-	            return ui;
-				
-            }).placeNode(function(nodeUI, pos) {
-                 // 'g' element doesn't have convenient (x,y) attributes, instead
-                // we have to deal with transforms: http://www.w3.org/TR/SVG/coords.html#SVGGlobalTransformAttribute
-				if (!nodeUI.bbox) {
-					nodeUI.bbox = nodeUI.getBBox();
-					var bbox = nodeUI.svgText.getBBox();
-					nodeUI.bckgr.attr('width', bbox.width+12);
-					nodeUI.attr('x', 105);
-				}
-				
-				//nodeUI.bckgr.attr('width', nodeSize*2);
-				nodeUI.attr('transform',
-                            'translate(' +
-                                  (pos.x -  nodeUI.bbox.width/2) + ',' + (pos.y - nodeSize/2) +
-                           ')');
-				
-            });
-
-			var createMarker = function(id) {
-                    return Viva.Graph.svg('marker')
-                               .attr('id', id)
-                               .attr('viewBox', "0 0 10 10")
-                               .attr('refX', "8")
-                               .attr('refY', "5")
-                               .attr('markerUnits', "strokeWidth")
-                               .attr('markerWidth', "8")
-                               .attr('markerHeight', "4")
-                               .attr('orient', "auto")
-							   .attr('style', 'fill:rgb(240,89,64)');
-                },
-
-            marker = createMarker('Triangle');
-            marker.append('path').attr('d', 'M 0 0 L 10 5 L 0 10 z');
-
-
-			
-            var geom = Viva.Graph.geom();
-
-            graphics.link(function(link){
-                // Notice the Triangle marker-end attribe:
-				var uig = Viva.Graph.svg('g');
-				
-				uig.data = link.data; 
-				uig.data.toId = link.toId;
-				uig.data.fromId = link.fromId;
-				
-                var ui = Viva.Graph.svg('path')
-       			    .attr('stroke-width', 1)
-				    .attr('fill', 'none');
-						   
-				uig.append(ui);			
-				uig.data.path = ui;
-				
-				if(link.data.type === 1 ) {
-					//class class
-					ui .attr('stroke', 'rgb(240,89,64)')		//blue 195,41,15
-						.attr('stroke-width', 2)
-						.attr('marker-end', 'url(#Triangle)');
-						
-					var label = Viva.Graph.svg('text').text(link.data.label).attr('font-size', '7').attr('font-weight', 'normal');
-					uig.append(label);
-					uig.data.label = label;
-					
-				} else if(link.data.type === 2 ) {
-					//Table-column
-					ui.attr('stroke', 'rgb(89,79,138)')
-						.attr('stroke-width', 2);
-				} else if(link.data.type === 3 ) {
-					//Mapping between table and class
-					ui.attr('stroke', 'rgb(0,159,218)')	///red 140,101,62
-                    .attr('stroke-dasharray', '5, 1')
-					.attr('stroke-width', 1);
-				} else if(link.data.type === 4 ) {
-					//Class-datapropr
-					ui.attr('stroke', 'rgb(41,166,121)')
-					.attr('stroke-width', 2)
-				} else if(link.data.type === 5 ) {
-					//Column-column (foreign key
-					ui.attr('stroke', 'rgb(89,79,138)')
-					.attr('stroke-width', 1)
-					.attr('stroke-dasharray', '5, 2')
-				}
-				
-				$(uig).hover(function() {
-                        handleMouseOverLink(link);
-                    },
-                    function(){
-                        handleMouseLeaveLink(link);
-                    });
-				
-				
-				return uig;		   
-            }).placeLink(function(linkUI, fromPos, toPos) {
-                // Here we should take care about
-                //  "Links should start/stop at node's bounding box, not at the node center."
-
-                // For rectangular nodes Viva.Graph.geom() provides efficient way to find
-                // an intersection point between segment and rectangle
-                var toNodeSize = nodeSize,
-                    fromNodeSize = nodeSize;
-
-				
-				var nodeUI = graphics.getNodeUI(linkUI.data.fromId);
-				var bbox = nodeUI.bckgr.getBBox();
-				var offset = 2;
-				
-                var from = geom.intersectRect(
-                        // rectangle:
-								fromPos.x - bbox.width / 2 , // left
-                                fromPos.y - bbox.height / 2 , // top
-                                fromPos.x + bbox.width / 2 , // right
-                                fromPos.y + bbox.height / 2 , // bottom
-						
-                        // segment:
-                                fromPos.x, fromPos.y, toPos.x, toPos.y)
-                           || fromPos; // if no intersection found - return center of the node
-				var nodeUI = graphics.getNodeUI(linkUI.data.toId);
-				var bbox = nodeUI.bckgr.getBBox();
-				
-                var to = geom.intersectRect(
-                        // rectangle:
-                                toPos.x - bbox.width / 2 -offset, // left
-                                toPos.y - bbox.height / 2 -offset, // top
-                                toPos.x + bbox.width / 2 +offset*2, // right
-                                toPos.y + bbox.height / 2 +offset, // bottom
-								
-								/*
-								toPos.x - toNodeSize / 2, // left
-                                toPos.y - toNodeSize / 2, // top
-                                toPos.x + toNodeSize / 2, // right
-                                toPos.y + toNodeSize / 2, // bottom
-								*/
-                        // segment:
-                                toPos.x, toPos.y, fromPos.x, fromPos.y)
-                            || toPos; // if no intersection found - return center of the node
-
-		
-				var ry = linkUI.data.type == 3 ? 0 : 0;
-                //var data = 'M' + from.x + ',' + from.y +
-                //           'L' + to.x + ',' + to.y;
-				var	data = 'M' + from.x + ',' + from.y + 
-                           ' A 100,' + ry + ',0,0,1,' + to.x + ',' + to.y;
-                linkUI.data.path.attr("d", data);
-				
-				if(linkUI.data.type === 1 ) {
-					posx = (from.x + to.x) / 2;
-					posy = (from.y + to.y) / 2;
-					
-					linkUI.data.label.attr("x", posx);
-                	linkUI.data.label.attr("y", posy);
-					
-					if (!linkUI.bbox) {
-						linkUI.bbox = linkUI.data.label.getBBox();
-					//	var bbox = linkUI.data.label.getBBox();
-					
-					}
-				
-					linkUI.data.label.attr('transform',	'translate(' +  ( -linkUI.bbox.width/2) + ',2)');
-				}
-            });
-
-			renderer.run();
-			$('#ea_loader').addClass('hidden'); //Hide mapping loader after render.
-
-            // Marker should be defined only once in <defs> child element of root <svg> element:
-            var defs = graphics.getSvgRoot().append('defs');
-            defs.append(marker);
-			
-			setTimeout(function(){renderer.pause();}, 2000);
-			
-			handleMouseUp = function(e, node) {
-				//alert("pined");
-				if (e.shiftKey) {
-					node.data.isPinned = true; //!node.data.isPinned;
-				}
-				layout.pinNode(node, !layout.isNodePinned(node));
-				//A table node or class has been moved, so, we store the positions.
-				//if(node.data.type === 2 || node.data.type === 1) {
-					
-					node.data.isPinned = true;
-					
-					var position = layout.getNodePosition(node.id);
-					
-					$.ajax({ url: '<?php echo base_url().'index.php/mappingspace/storepositions'; ?>',
-							 data: {mappingspaceid: <?php echo $mappingspace->id; ?>, nodeid: node.id, layoutX: position.x, layoutY: position.y},
-							 type: 'post',
-							 success: function(output) {}
-					});
-				//}
-
-				timer = setTimeout(function(){renderer.pause(); clearTimeout(timer);}, 2000);
-			},
-			
-			highlightNode = function (nodeid, onoff, expand, main) {
-				var nodeUI = graphics.getNodeUI(nodeid);
-
-				nodeUI.attr('style', 'opacity:1.0'); //marron: 150,111,7
-				
-				if(onoff) {
-					if(main){
-						nodeUI.bckgr.attr('stroke', 'rgb(000,000,000)').attr('stroke-width', 2.5);						
-					} else{
-						nodeUI.bckgr.attr('stroke', 'rgb(50,50,50)').attr('stroke-width', 1.5);					
-					}
-				} else {
-					nodeUI.bckgr.attr('stroke-width', 0);
-				}
-				
-				if(expand) {
-					graph.forEachLinkedNode(nodeid, function(nodeTo, link){
-						var linkUI = graphics.getLinkUI(link.id);
-						if (linkUI && link.data.type == 3) {
-						
-							
-							highlightNode(link.toId, onoff, false, false);
-							
-							if(onoff) {
-								linkUI.data.path.attr('stroke-width', 3);
-								linkUI.data.path.attr('style', 'opacity:1.0');
-							
-							} else {
-								linkUI.data.path.attr('stroke-width', 1);
-							}
-							
-						}
-					});
-				}
-				//showing the description (type of the column)
-				if (nodeUI.svgDescription) {
-					
-					if(onoff) 	nodeUI.svgDescription.attr('visibility', 'visible');
-					else 		nodeUI.svgDescription.attr('visibility', 'hidden');
-					
-				}
-			}
-				
-			handleMouseOverNode = function(node) {
-				
-				HideAllNodes(true);
-				
-				handleMouseOverNodeId(node.id, node.data.type, true);
-			},
-			
-			handleMouseOverNodeId = function(nodeid, type, main) {
-			
-				highlightNode(nodeid, true, true, main);
-				
-				graph.forEachLinkedNode(nodeid, function(nodeTo, link){
-					var linkUI = graphics.getLinkUI(link.id);
-					if (linkUI) {
-					    linkUI.data.path.attr('stroke-width', 3);
-					    linkUI.data.path.attr('style', 'opacity:1.0');
-
-						if(linkUI.data.label)
-							linkUI.data.label.attr('font-weight', 'bold').attr('font-size', '8');
-
-						if(link.toId != nodeid)
-							highlightNode(link.toId, true, true, false);
-						if(link.fromId != nodeid)
-							highlightNode(link.fromId, true, true, false);
-						
-						if(type === 2) {
-							if(link.toId != nodeid)
-								handleMouseOverNodeId(nodeTo.id, nodeTo.data.type, false);
-						}
-					}
-				});
-			},
-
-			HideAllNodes = function(onoff) {
-			
-				graph.forEachNode(function(node){
-					var nodeUI = graphics.getNodeUI(node.id);
-					if(onoff) {
-						nodeUI.attr('style', 'opacity:0.5'); //marron: 150,111,7
-							
-					} else {
-						nodeUI.attr('style', 'opacity:1.0'); //marron: 150,111,7
-					}
-				});
-				
-				graph.forEachLink(function(link){
-					var linkUI = graphics.getLinkUI(link.id);
-					if(onoff) {
-						linkUI.data.path.attr('style', 'opacity:0.5'); //marron: 150,111,7
-							
-					} else {
-						linkUI.data.path.attr('style', 'opacity:1.0'); //marron: 150,111,7
-					}
-				});
-			},
-				
-			handleMouseLeaveNode = function(node) {
-				
-				HideAllNodes(false);
-				
-				highlightNode(node.id, false, true, false);
-				
-				graph.forEachLinkedNode(node.id, function(nodeTo, link){
-					var linkUI = graphics.getLinkUI(link.id);
-					if (linkUI) {
-						if(link.data.type === 1 || link.data.type === 2 || link.data.type === 4) 
-							linkUI.data.path.attr('stroke-width', 2);
-						else 
-							linkUI.data.path.attr('stroke-width', 1);
-					
-						if(linkUI.data.label)
-							linkUI.data.label.attr('font-weight', 'normal').attr('font-size', '7');
-							
-						highlightNode(link.toId, false, true, false);
-						highlightNode(link.fromId, false, true, false);
-						
-						if(node.data.type === 2) {
-							if(link.toId != node.id)
-								handleMouseLeaveNode(nodeTo);						
-						}
-					}
-				});
-			},
-		   
-			handleMouseOverLink = function(link) {
-			   
-				var linkUI = graphics.getLinkUI(link.id);
-				linkUI.data.path.attr('stroke-width', 3);
-				if(linkUI.data.label)
-					linkUI.data.label.attr('font-weight', 'bold').attr('font-size', '8');
-							
-				highlightNode(link.toId, true, true, false);
-				highlightNode(link.fromId, true, true, false);
-
-			},
-
-			handleMouseLeaveLink = function(link) {
-				var linkUI = graphics.getLinkUI(link.id);
-				if(link.data.type === 1 || link.data.type === 2 || link.data.type === 4) 
-					linkUI.data.path.attr('stroke-width', 2);
-				else
-					linkUI.data.path.attr('stroke-width', 1);
-				
-				if(linkUI.data.label)
-					linkUI.data.label.attr('font-weight', 'normal').attr('font-size', '7');
-							
-				highlightNode(link.toId, false, true, false);
-				highlightNode(link.fromId, false, true, false);
-
-			};
-			
-			$('#highlightForm').submit(function(e) {
-				e.preventDefault();
-				var action = $('#action').val();
-				var nodeId = $('#nodeid').val();
-				
-				var table = $('#table').val();
-				
-		
-				if(action === "highlight") {
-					handleMouseOverNode(graph.getNode(nodeId));
-				} else {
-					handleMouseLeaveNode(graph.getNode(nodeId));
-				}
-				
-			});
-        };
-	
-    // or to execute some function
-    window.onload = main; //notice no parenthesis
-    </script>
-
-<!--
-	<div class="ui green segment">
-		<div class="ui two column divided grid">
-			<div class="ui column">
-				Data source: <span style="font-weight:bold;"><a href="<?php echo base_url();?>index.php/datasource/view/<?php echo $datasource->id; ?>"><?php echo $datasource->name; ?></a></span><br />
-				Ontology: <span style="font-weight:bold;"><?php echo $ontologyName; ?></span><br />
-				Modified: <span style="font-weight:bold;"><?php echo $datasource->date; ?></span><br />
-			</div>
-			<div class="ui column">
-				Mapping space: <span style="font-weight:bold;"><a href="<?php echo base_url();?>index.php/mappingspace/graph/<?php echo $datasource->id; ?>/<?php echo $mappingspace->id; ?>"><?php echo $mappingspace->name; ?></a></span> <br />
-			</div>
-		</div>
-	</div>
--->
 	<div class="ui stackable grid">
-		<div class="five wide column">
+		<div id="left_grid" class="five wide column">
 
 			<div class="ui green segment g_left_col">
 
@@ -704,7 +20,7 @@
 				<div id="options_1_mapping">
 					<div id="content">
 						<table width="100%"><tr><td>
-								Mappings:  <a href="<?php echo base_url();?>index.php/mappedclass/createnew/<?php echo $datasource_id."/".$mappedspace_id; ?>"><i class="circular add purple link icon" data-content="Click it for creating a new mapping between a class and a table "></i></a>
+								Mappings:  <a href="<?php echo base_url();?>index.php/mappedclass/createnew/<?php echo $this->maponrouting->getDatasourceId() ."/".$this->maponrouting->getMappingSpaceId(); ?>"><i class="circular add purple link icon" data-content="Click it for creating a new mapping between a class and a table "></i></a>
 						</td><td style="text-align: right">
 							<div class="ui icon input" data-content="Search a mapping by name of the class of the table to highlight it" >
 								<input type="text" id="input_mapping" size="20" name="input_mapping" class="gl_clear_default" autocomplete="off" value="search..." onkeyup="chk_searchmapping();" onclick="chk_searchmapping(0);" >
@@ -855,11 +171,13 @@
 
 			</div>
 		</div>
-		<div class="eleven wide column">
+		<div id="right_grid" class="eleven wide column">
 
 			<div class="ui green segment g_right_col">
+				
 				<div class="ui small header">
 					<table width="100%"><tr><td>
+					<i id="horizontal_collapse" style="margin-left: -30px; position: fixed; color: gray;" class="caret left icon link"></i>
 					<div class="right_colum_title"><strong>Graph representation of the mappings</strong></div>
 					</td><td style="text-align: right">		
 						<i class="circular history purple link icon" onclick="sidebar();" data-position="top left" data-html="click to too see the history log"></i>
@@ -871,7 +189,7 @@
 
 					<!-- Mapping Graph -->
 					<div id="graph_1_mapping" style="overflow: hidden">
-						<div id="graphDiv" class="g_right_col_graph" style="background-image: URL(<?php echo base_url()?>public/img/lightbg.png); height:650px "></div>
+						<div id="graphDiv" class="g_right_col_graph avoid_right_click unselectable" style="background-image: URL(<?php echo base_url()?>public/img/lightbg.png); height:650px "></div>
 					</div>
 
 					<!-- Ontology Graph - WebVOWL -->
@@ -927,7 +245,7 @@
 	<div id="mapping_dropdown" class="ui top pointing dropdown" style="position: absolute; top: 100px; left: 100px;">
 
 		<div class="menu">
-			<div style="position: absolute; height: 50px; width: 100%; margin-top: -20px;"></div> <!-- Necesary for hissing when mouse leave -->
+			<div style="position: absolute; height: 50px; width: 100%; margin-top: -40px;"></div> <!-- Necesary for hissing when mouse leave -->
 
 			<a class="item url1"><i class="edit purple icon"></i>Edit mapping</a>
 
@@ -939,29 +257,40 @@
 
 			<a class="item url5" style=" text-align=left;" title="Expand class"><i class="edit purple icon" ></i>Edit data property</a>
 
+			<a class="item url7"><i class="external share purple icon" ></i>Move to<div class="menu suburl7"></div></a>
+
+			<a class="item url8" data-content="The URI" onclick="copyToClipboard( this.getAttribute('data-content') );"><i class="external copy purple icon" ></i>Copy uri</a>
+
 			<a class="item url6" onclick="return confirm('Are you sure?');"><i class="delete red icon" ></i>Delete</a>
+
+
 		</div>
 	</div>
-	
-	<div style="display: none;"> 
-		<form id='highlightForm'>
-        <input type='text' id='action' value=""/>
-		<input type='text' id='nodeid' value= ""/>
-		<input type='text' id='table' value="" />
-		<input type='submit' value='center'/>
-        </form>
-	</div>
+
 	
 <script>
+	var mappingGraph;
+
+	window.onload = function() {
+		mappingGraph = new mapping_graph();
+		mappingGraph.draw();
+	};
+
 	///////////////////////////////////////////////////
 	// JS functions for Datatype selection
 	//
-	
-	$('.ui.dropdown')
-		.dropdown({
+
+	function copyToClipboard(text) {
+		var $temp = $("<input>");
+		$("body").append($temp);
+		$temp.val(text).select();
+		document.execCommand("copy");
+		$temp.remove();
+	}
+
+	$('#mapping_dropdown').dropdown({
 			on: 'hover'
-		})
-	;
+	});
 
 	var timer;
 
@@ -995,7 +324,7 @@
 			// Show loader until receiving load() data.
 			$("#suggest_Mapping").html('<div class="ui inverted active dimmer"><div class="ui mini text loader">Searching....</div></div><br/><br/>');
 
-			$("#suggest_Mapping").load('<?php echo site_url("mappingspace/searchmapping"); ?>', { string: document.getElementById('input_mapping').value, mappingspace_id: <?php echo $mappingspace->id; ?>,datasource_id: <?php echo $datasource_id; ?>  } );
+			$("#suggest_Mapping").load('<?php echo site_url("mappingspace/searchmapping"); ?>', { string: document.getElementById('input_mapping').value, mappingspace_id: <?php echo $mappingspace->id; ?>,datasource_id: <?php echo $this->maponrouting->getDatasourceId(); ?>  } );
 
 			var position = $("#input_mapping").position();
 			document.getElementById('suggest_Mapping').style.top = position.top+50 + "px";
@@ -1020,14 +349,16 @@
 		
 
 		//highligth
-		document.getElementById('action').value = "highlight";
-		document.getElementById('nodeid').value = string_uri;
-		document.getElementById('table').value = "";
+		//handleMouseOverNode( graph.getNode(string_uri) );
+		mappingGraph.onMouseNode( string_uri, 'over' );
 
 		hoverLabelClass(string_uri, '');
 		//document.getElementById('viewbox_'+string_uri.replace(":", "--")).style.backgroundColor = 'rgb(252,221,216)';
-		
-		$( "#highlightForm" ).submit();
+
+
+
+
+
 
     }
 	/*
@@ -1040,7 +371,7 @@
 		//alert(idTable);
 		if(document.getElementById(idTable).value != ""){   
 
-			$("#suggest_Table").load('<?php echo site_url("mapping/suggesttable"); ?>', { string: document.getElementById(idTable).value, datasource_id: <?php echo $datasource_id; ?>, target: idTable } );
+			$("#suggest_Table").load('<?php echo site_url("mapping/suggesttable"); ?>', { string: document.getElementById(idTable).value, datasource_id: <?php echo $this->maponrouting->getDatasourceId(); ?>, target: idTable } );
 
 			var position = $("#"+idTable).position();
 			var width = document.getElementById('suggest_Table').style.width;
@@ -1058,9 +389,9 @@
 		$("#suggest_Table").fadeOut();
 		
 		//To autocomplete the SQL section
-		$("#input_sql").load('<?php echo site_url("mapping/generateSQL"); ?>', { input_table: string_uri, datasource_id: <?php echo $datasource_id; ?> } );
+		$("#input_sql").load('<?php echo site_url("mapping/generateSQL"); ?>', { input_table: string_uri, datasource_id: <?php echo $this->maponrouting->getDatasourceId(); ?> } );
 		//To autocomplete the URI section
-		$("#input_uri").load('<?php echo site_url("mapping/generateURI"); ?>', { input_class: document.getElementById('input_class').value, input_table: document.getElementById(idTable).value, datasource_id: <?php echo $datasource_id; ?> } );
+		$("#input_uri").load('<?php echo site_url("mapping/generateURI"); ?>', { input_class: document.getElementById('input_class').value, input_table: document.getElementById(idTable).value, datasource_id: <?php echo $this->maponrouting->getDatasourceId(); ?> } );
     }*/
 	function add_search_box_Table(string_uri) {
 
@@ -1091,26 +422,24 @@
 	//////////////////////////////////////////////
 
 	function hoverLabelClass(mappedclass_id, table) {
-		
-		document.getElementById('action').value = "highlight";
-		document.getElementById('nodeid').value = mappedclass_id;
-		document.getElementById('table').value = "";
+
 
 		document.getElementById('viewbox_'+mappedclass_id.replace(":", "--")).style.backgroundColor = 'rgb(253,230,226)';//#e0eee0';
-		
-		$( "#highlightForm" ).submit();
+
+		// Higlihgt
+		//handleMouseOverNode(graph.getNode(mappedclass_id));
+		mappingGraph.onMouseNode( mappedclass_id, 'over' );
+
 		
 	}
 	
 	function outLabelClass(mappedclass_id, table) {
-		
-		document.getElementById('action').value = "nohighlight";
-		document.getElementById('nodeid').value = mappedclass_id;
-		document.getElementById('table').value = "";
 
 		document.getElementById('viewbox_'+mappedclass_id.replace(":", "--")).style.backgroundColor = '#faf9fa';
 
-		$( "#highlightForm" ).submit();
+		// nohighlight
+		//handleMouseLeaveNode(graph.getNode(mappedclass_id));
+		mappingGraph.onMouseNode( mappedclass_id, 'leave' );
 
 	}
 
@@ -1134,9 +463,14 @@
 	<script type="text/javascript">
 		var php_vars = JSON.parse(unescape('<?php echo addslashes( json_encode($_ci_data['_ci_vars']) ); ?>'));
 		php_vars.base_url = '<?php echo base_url(); ?>';
-		php_vars.db_tables = '<?php echo json_encode($tables); ?>';
-		php_vars.db_columns = '<?php echo json_encode($columns); ?>';
+		php_vars.user_technician = <?php echo ($this->ion_auth->in_group("technician")==1) ? "true" : "false"  ?>;
+
+		php_vars.routes = JSON.parse('<?php echo json_encode($routes); ?>');
+		php_vars.mp_graph = JSON.parse(unescape('<?php echo addslashes( json_encode($mapping_graph) ); ?>'));
 	</script>
+
+	<script src="<?php echo base_url(); ?>/public/js/common/mapping_graph.js" language="javascript" type="text/javascript" ></script>
+
 
 	<script src="<?php echo base_url(); ?>/public/js/common/edition_area.js"></script>
 	<script src="<?php echo base_url(); ?>/public/js/mappingspace/graph.js" language="javascript" type="text/javascript" ></script>

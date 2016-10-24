@@ -107,9 +107,10 @@ class r2rml_parser extends CI_Model {
                 // Extract the colum from the subject template /aaa/bbb/{"column"}
                 $value = $this->parseTemplate($auxSubjectTemplate, $logicalTable['query'], $logicalTable['table']);
 
-                if ( $logicalTable['isQuery'] == false ) {
-                    $auxSubjectTemplate = str_replace($value['column'], $value['table'].$value['column'], $auxSubjectTemplate);
-                }
+                //if ( $logicalTable['isQuery'] == false ) { (1*)
+                    // Antes de hacer la importación de CSV, si había un tableName en mysql, se generaba como tableCOlumna en vez de Columna
+                    //$auxSubjectTemplate = str_replace($value['column'], $value['table'].$value['column'], $auxSubjectTemplate);
+                //}
 
                 $sm['template'] = $auxSubjectTemplate;
                 $sm['table'] = $value['table'];
@@ -150,11 +151,16 @@ class r2rml_parser extends CI_Model {
                 $column = $objectMap->get("rr:column");
 
                 if ( $column !== null ) {
-                    // It can be an alias. Change the alias with the real table.column
-                    $this->sql_parser->setQuery($logicalTable['query']);
-                    $aliasInfo = $this->sql_parser->regex_getAliasInfo($column);
-                    $pom['table'] = $aliasInfo['table'];
-                    $pom['column'] = $aliasInfo['column'];
+                    if ( $logicalTable['isQuery'] ) {
+                        // It can be an alias. Change the alias with the real table.column
+                        $this->sql_parser->setQuery($logicalTable['query']);
+                        $aliasInfo = $this->sql_parser->regex_getAliasInfo($column);
+                        $pom['table'] = $aliasInfo['table'];
+                        $pom['column'] = $aliasInfo['column'];
+                    } else {
+                        // The csv don't have query, only the column.
+                        $pom['column'] = $column;
+                    }
                 }
 
                 $template = $objectMap->get("rr:template");
@@ -166,9 +172,9 @@ class r2rml_parser extends CI_Model {
                     $pom['table'] = $value['table'];
                     $pom['column'] = $value['column'];
 
-                    if ( $logicalTable['isQuery'] === false ) {
-                        $template = str_replace($value['column'], $value['table'] . $value['column'], $template);
-                    }
+                    //if ( $logicalTable['isQuery'] === false ) { (1*)
+                    //    $template = str_replace($value['column'], $value['table'].$value['column'], $template);
+                    //}
 
                     $pom['template'] = ''.$template;
 
@@ -201,87 +207,25 @@ class r2rml_parser extends CI_Model {
             $ret['column'] = $templateValue;
         } else {
             // It can be an alias. Change the alias with the real table.column
-            $this->sql_parser->setQuery($query);
-            $aliasInfo = $this->sql_parser->regex_getAliasInfo($templateValue);
-            $ret['table'] = $aliasInfo['table'];
-            $ret['column'] = $aliasInfo['column'];
+            $parts = explode (".", $templateValue);
+
+            if ( count($parts) == 2 ) {
+                // The template value is table.column
+                $ret['table'] = $parts[0];
+                $ret['column'] = $parts[1];
+            } else {
+                // The template value can be an alias.
+                $this->sql_parser->setQuery($query);
+                $aliasInfo = $this->sql_parser->regex_getAliasInfo($templateValue);
+                $ret['table'] = $aliasInfo['table'];
+                $ret['column'] = $aliasInfo['column'];
+            }
+
+
         }
 
         return $ret;
     }
-
-    /*
-    private function parseQuery($query) {
-
-        $query_return = [];
-        $table = "";
-
-        $inx = stripos($query, " from ");
-        if ($inx !== false) {
-            $inx+= 6;
-            $inx2 = stripos($query, "where");
-            $tot= strlen($query);
-
-            if ($inx2 !== false)
-                $tot = $inx2;
-            $inx3 = stripos($query, "inner");
-            if ($inx3 !== false && $inx3 < $inx2)
-                $tot = $inx3;
-
-            $table = substr($query, $inx, $tot -$inx-1);
-        }
-
-        $query_return['table'] = $table;
-
-        return $query_return;
-    }
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-    private function regex_get_query_parts( $query ) {
-        $matches = [];
-        $regex = '@SELECT (?<select>.*) FROM (?<from>.*)@i';
-        preg_match($regex, $query, $matches);
-        return $matches;
-    }
-
-    private function regex_get_query_alias_list( $query ) {
-
-        $query_parts = $this->regex_get_query_parts($query);
-        if ( empty($query_parts['select']) ) return [];
-
-        $matches = [];
-        $regex = '@\\s*(?P<original>[a-zA-Z0-9_.]+) AS (?P<alias>[a-zA-Z0-9_]+),?\\s?@i';
-
-        preg_match_all($regex, $query_parts['select'], $matches, PREG_SET_ORDER);
-
-        return $matches;
-    }
-
-    private function regex_get_name_from_alias( $query, $alias ) {
-
-        $alias_list = $this->regex_get_query_alias_list($query);
-
-        foreach ( $alias_list as $a ) {
-            if ( $a['alias'] == $alias ) return $a['original'];
-        }
-
-        return $alias;
-    }
-*/
-
-
+    
 
 }

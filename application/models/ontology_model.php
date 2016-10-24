@@ -8,52 +8,51 @@ class Ontology_model extends CI_Model
 	
 	function getOntologies() {
 	
-		$query = $this->db->get("ontology");
+		$query = $this->team->db->get("ontology");
 	
 		return($query->result());	
 	}
 	
 	function getOntology($id)
 	{
-		$this->db->where('id', $id);
+		$this->team->db->where('id', $id);
 
-		$query = $this->db->get("ontology");
+		$query = $this->team->db->get("ontology");
 		
-		$ret = $query->result();
-		return($ret[0]);	
+		return $query->row();
 	}
 
 	function add($name, $user_id)
 	{
-		$this->db->insert('ontology', array('name' => $name,'date' => date("Y-m-d"),'user_id' => $user_id));
+		$this->team->db->insert('ontology', array('name' => $name,'date' => date("Y-m-d"),'user_id' => $user_id));
 		
-		return($this->db->insert_id());
+		return($this->team->db->insert_id());
 	}
 
 	function update($id, $name, $url)
 	{
-		$this->db->where('id', $id);
-		$this->db->update('ontology', array('name' => $name,'date' => date("Y-m-d")));
+		$this->team->db->where('id', $id);
+		$this->team->db->update('ontology', array('name' => $name,'date' => date("Y-m-d")));
 	}
 
 	function delete($id)
 	{
-		$this->db->where("ontology_id", $id);
-		$this->db->delete("prefix");
+		$this->team->db->where("ontology_id", $id);
+		$this->team->db->delete("prefix");
 		
-		$this->db->where("ontology_id", $id);
-		$this->db->delete("ontology_modules");
+		$this->team->db->where("ontology_id", $id);
+		$this->team->db->delete("ontology_modules");
 		
-		$this->db->where("id", $id);
-		$this->db->delete("ontology");
+		$this->team->db->where("id", $id);
+		$this->team->db->delete("ontology");
 	}
 	
 	
 	function addModule($name, $file, $url, $ontology_id)
 	{
-		$this->db->insert('ontology_modules', array('name' => $name,'file' => $file,'url' => $url,'ontology_id' => $ontology_id));
+		$this->team->db->insert('ontology_modules', array('name' => $name,'file' => $file,'url' => $url,'ontology_id' => $ontology_id));
 		
-		return($this->db->insert_id());
+		return($this->team->db->insert_id());
 	}
 
 	
@@ -62,18 +61,18 @@ class Ontology_model extends CI_Model
 	
 	function getOntologyModules($ontology_id)
 	{
-		$this->db->where('ontology_id', $ontology_id);
+		$this->team->db->where('ontology_id', $ontology_id);
 
-		$query = $this->db->get("ontology_modules");
+		$query = $this->team->db->get("ontology_modules");
 		
 		return($query->result());	
 	}
 
 	function getOntologyLayout( $datasource_id )
 	{
-		$this->db->where('datasource_id', $datasource_id);
+		$this->team->db->where('datasource_id', $datasource_id);
 
-		$query = $this->db->get("ontology_layout");
+		$query = $this->team->db->get("ontology_layout");
 
 		return($query->result());
 	}
@@ -81,13 +80,13 @@ class Ontology_model extends CI_Model
 	function setOntologyLayout( $datasource_id, $nodeid, $insert, $layoutX, $layoutY )
 	{
 		// Delete if exist.
-		$this->db->where("datasource_id", $datasource_id);
-		$this->db->where("nodeid", $nodeid);
-		$this->db->delete("ontology_layout");
+		$this->team->db->where("datasource_id", $datasource_id);
+		$this->team->db->where("nodeid", $nodeid);
+		$this->team->db->delete("ontology_layout");
 
 		if ( !$insert ) return;
 
-		$this->db->insert('ontology_layout', array('nodeid' => $nodeid, 'layoutX' => $layoutX, 'layoutY' => $layoutY, 'datasource_id' => $datasource_id));
+		$this->team->db->insert('ontology_layout', array('nodeid' => $nodeid, 'layoutX' => $layoutX, 'layoutY' => $layoutY, 'datasource_id' => $datasource_id));
 
 	}
 
@@ -101,7 +100,8 @@ class Ontology_model extends CI_Model
 		
 		
 		include_once("public/arc2/ARC2.php");
- 
+       
+
 		require_once "public/easyrdf/EasyRdf.php";
 		
 	
@@ -122,10 +122,22 @@ class Ontology_model extends CI_Model
         //$parser->parse("http://localhost/mapon/upload/ontology.ttl");
 		$parser->parse($base_url . "/" . $file);
 
-
 		$easyRdf_initialNamespaces = EasyRdf_Namespace::namespaces();
 		$file_namespaces_ttl = empty($parser->parser->prefixes) ? [] : $parser->parser->prefixes;
-        $file_namespaces_xml = empty($parser->parser->nsp) ? [] : $parser->parser->nsp;
+        $file_namespaces_xml = [];
+        if ( !empty($parser->parser->nsp) ) {
+            $file_namespaces_xml = $parser->parser->nsp;
+        } else {
+            libxml_use_internal_errors(true);
+            $xml = simplexml_load_file($base_url . "/" . $file);
+            if ( $xml !== false ) {
+                $namespaces = $xml->getDocNamespaces(true);
+                foreach($namespaces as $key=>$val){
+                    $file_namespaces_xml[(string)$val] = (string)$key;
+                }
+            }
+        }
+
 
 		$ns = $easyRdf_initialNamespaces;
 
@@ -225,7 +237,8 @@ class Ontology_model extends CI_Model
 
 		$newtriples = array();
 		
-			echo "RANGE: Triples: ".count($ret)."<br>";
+			//echo "RANGE: Triples: ".count($ret)."<br>";
+            $range_triples = count($ret);
 		
 		foreach($ret as $t){
 			$nt["s"] = $t["objproperties"];
@@ -246,7 +259,15 @@ class Ontology_model extends CI_Model
 		$ret = $store_Mysql->query($qDomain,'rows');
 
 		
-			echo "DOMAIN: Triples: ".count($ret)."<br>";
+			//echo "DOMAIN: Triples: ".count($ret)."<br>";
+        $domain_triples = count($ret);
+
+        $msg = "<ul class='list'>";
+        $msg .= '<li>RANGE: Triples: ' . $range_triples . '</li>';
+        $msg .= '<li>DOMAIN: Triples: ' . $domain_triples . '</li>';
+        $msg .= '</ul>';
+
+        $this->maponrouting->showMessage( true, "Success", $msg );
 		
 		$newtriples = array();
 		
@@ -690,13 +711,13 @@ class Ontology_model extends CI_Model
 	
 	function getOwl($store_Mysql, $ontology_id)
 	{
-		include_once("public/arc2/ARC2.php");
+		//include_once("public/arc2/ARC2.php");
 		
 		if (!$store_Mysql->isSetUp()) {
 			$store_Mysql->setUp(); /* create MySQL tables */
 		}
 
-		$arc2 = new ARC2_Class(array(), new stdClass);
+		//$arc2 = new ARC2_Class(array(), new stdClass);
 
 		$ont = $this->getOntology($ontology_id);
 		 
@@ -704,7 +725,7 @@ class Ontology_model extends CI_Model
 		//$pathSPOG = "upload/owl/".$ontology_id."_".$ont->name.".spog";
 
 
-        $path = "upload/ontologies/". $ontology_id."_".$ont->name . "/";
+        $path = "upload/".$this->team->dir()."/ontologies/". $ontology_id."_".$ont->name . "/";
         $parhOwl = $path . $ont->name.".owl";
         $pathSPOG = $path . $ont->name.".spog";
 
@@ -727,7 +748,7 @@ class Ontology_model extends CI_Model
 
 		$rdfxml_doc = $parser->toRDFXML($triples);
 		
-		var_dump($rdfxml_doc);
+		//var_dump($rdfxml_doc);
 
 		$fp = fopen($parhOwl, 'w');
             fwrite($fp, $rdfxml_doc);
@@ -747,9 +768,9 @@ class Ontology_model extends CI_Model
 	{
 		$path = "";
 		
-		$this->db->where("SourceClass", $sourceClass);
-		$this->db->where("TargetClass", $targetClass);
-		$query = $this->db->get("EnergyModel_Paths");
+		$this->team->db->where("SourceClass", $sourceClass);
+		$this->team->db->where("TargetClass", $targetClass);
+		$query = $this->team->db->get("EnergyModel_Paths");
 		
 		$retarray = $query->result();
 		
@@ -774,7 +795,7 @@ class Ontology_model extends CI_Model
 				
 				$data = array('Class' => substr($row, 0, $pos), 'Superclasses' => substr($row, $pos+1, strlen($row)-$pos-1));
 
-				$this->db->insert('EnergyModel_SuperClasses', $data);
+				$this->team->db->insert('EnergyModel_SuperClasses', $data);
 			}
 		}
 	}

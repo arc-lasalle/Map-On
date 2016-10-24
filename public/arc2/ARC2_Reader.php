@@ -3,8 +3,8 @@
  * ARC2 Web Client
  *
  * @author Benjamin Nowack
- * @license <http://arc.semsol.org/license>
- * @homepage <http://arc.semsol.org/>
+ * @license W3C Software License and GPL
+ * @homepage <https://github.com/semsol/arc2>
  * @package ARC2
  * @version 2010-11-16
 */
@@ -21,8 +21,8 @@ class ARC2_Reader extends ARC2_Class {
     parent::__init();
     $this->http_method = $this->v('http_method', 'GET', $this->a);
     $this->message_body = $this->v('message_body', '', $this->a);;
-    $this->http_accept_header = $this->v('http_accept_header', 'Accept: application/rdf+xml; q=0.9, */*; q=0.1', $this->a);
-    $this->http_user_agent_header = $this->v('http_user_agent_header', 'User-Agent: ARC Reader (http://arc.semsol.org/)', $this->a);
+    $this->http_accept_header = $this->v('http_accept_header', 'Accept: application/rdf+xml; q=0.9, text/turtle; q=0.8, */*; q=0.1', $this->a);
+    $this->http_user_agent_header = $this->v('http_user_agent_header', 'User-Agent: ARC Reader (https://github.com/semsol/arc2)', $this->a);
     $this->http_custom_headers = $this->v('http_custom_headers', '', $this->a);
     $this->max_redirects = $this->v('max_redirects', 3, $this->a);
     $this->format = $this->v('format', false, $this->a);
@@ -214,6 +214,7 @@ class ARC2_Reader extends ARC2_Class {
     /* relative redirect */
     if (!isset($parts['scheme']) && $prev_parts) $parts['scheme'] = $prev_parts['scheme'];
     if (!isset($parts['host']) && $prev_parts) $parts['host'] = $prev_parts['host'];
+    if (!isset($parts['port']) && $prev_parts) $parts['port'] = $prev_parts['port'];
     /* no scheme */
     if (!$this->v('scheme', '', $parts)) return $this->addError('Socket error: Missing URI scheme.');
     /* port tweaks */
@@ -226,7 +227,8 @@ class ARC2_Reader extends ARC2_Class {
     else {
       $h_code = $http_mthd . ' ' . $this->v1('path', '/', $parts) . (($v = $this->v1('query', 0, $parts)) ? '?' . $v : '') . (($v = $this->v1('fragment', 0, $parts)) ? '#' . $v : '');
     }
-    $port_code = ($parts['port'] != 80) ? ':' . $parts['port'] : '';
+    $scheme_default_port = ($parts['scheme'] == 'https') ? 443 : 80;
+    $port_code = ($parts['port'] != $scheme_default_port) ? ':' . $parts['port'] : '';
     $h_code .= ' HTTP/1.0' . $nl.
       'Host: ' . $parts['host'] . $port_code . $nl .
       (($v = $this->http_accept_header) ? $v . $nl : '') .
@@ -251,7 +253,7 @@ class ARC2_Reader extends ARC2_Class {
           stream_context_set_option($context, 'ssl', $m[1], $v);
         }
       }
-      $s = stream_socket_client('ssl://' . $parts['host'] . $port_code, $errno, $errstr, $this->timeout, STREAM_CLIENT_CONNECT, $context);
+      $s = stream_socket_client('ssl://' . $parts['host'] . ":" . $parts['port'], $errno, $errstr, $this->timeout, STREAM_CLIENT_CONNECT, $context);
     }
     elseif ($parts['scheme'] == 'https') {
       $s = @fsockopen('ssl://' . $parts['host'], $parts['port'], $errno, $errstr, $this->timeout);
@@ -370,7 +372,7 @@ class ARC2_Reader extends ARC2_Class {
   
   function closeStream() {
     if (isset($this->stream)) {
-      if ($this->v('type', 0, $this->stream) == 'socket') {
+      if ($this->v('type', 0, $this->stream) == 'socket' && !empty($this->stream['socket'])) {
         @fclose($this->stream['socket']);
       }
       unset($this->stream);

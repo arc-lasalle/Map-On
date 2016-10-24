@@ -7,27 +7,27 @@ class Prefix_model extends CI_Model
 	}
 	
 	function getPrefixes($ontology_id) {
-		$this->db->where('ontology_id', $ontology_id);
-		$query = $this->db->get("prefix");
+		$this->team->db->where('ontology_id', $ontology_id);
+		$query = $this->team->db->get("prefix");
 	
 		return($query->result());	
 	}
 	
 	function getPrefix($id)
 	{
-		$this->db->where('id', $id);
+		$this->team->db->where('id', $id);
 
-		$query = $this->db->get("prefix");
+		$query = $this->team->db->get("prefix");
 		
 		return($query->result());	
 	}
 	
 	function getByIRI($iri, $ontology_id)
 	{
-		$this->db->where('ontology_id', $ontology_id);
-		$this->db->where('iri', $iri);
+		$this->team->db->where('ontology_id', $ontology_id);
+		$this->team->db->where('iri', $iri);
 
-		$query = $this->db->get("prefix");
+		$query = $this->team->db->get("prefix");
 		if ($query->num_rows() > 0)
 		{
 			$row = $query->row(); 
@@ -39,10 +39,10 @@ class Prefix_model extends CI_Model
 	
 	function getByPrefix($prefix, $ontology_id)
 	{
-		$this->db->where('ontology_id', $ontology_id);
-		$this->db->where('prefix', $prefix);
+		$this->team->db->where('ontology_id', $ontology_id);
+		$this->team->db->where('prefix', $prefix);
 
-		$query = $this->db->get("prefix");
+		$query = $this->team->db->get("prefix");
 		
 		if ($query->num_rows() > 0)
 		{
@@ -55,8 +55,8 @@ class Prefix_model extends CI_Model
 	
 	function getQName($URI, $ontology_id)
 	{
-		$this->db->where('ontology_id', $ontology_id);
-		$results = $this->db->get("prefix")->result();
+		$this->team->db->where('ontology_id', $ontology_id);
+		$results = $this->team->db->get("prefix")->result();
 		
 		foreach($results as $row) {
 			if(strpos($URI, $row->iri) === 0) {
@@ -82,21 +82,21 @@ class Prefix_model extends CI_Model
 	
 	function add($prefix, $iri, $ontology_id)
 	{
-		$this->db->insert('prefix', array('prefix' => $prefix,'iri' => $iri,'ontology_id' => $ontology_id));
+		$this->team->db->insert('prefix', array('prefix' => $prefix,'iri' => $iri,'ontology_id' => $ontology_id));
 		
-		return($this->db->insert_id());
+		return($this->team->db->insert_id());
 	}
 
 	function update($id, $prefix, $iri, $ontology_id)
 	{
-		$this->db->where('id', $id);
-		$this->db->update('prefix', array('prefix' => $prefix,'iri' => $iri,'ontology_id' => $ontology_id));
+		$this->team->db->where('id', $id);
+		$this->team->db->update('prefix', array('prefix' => $prefix,'iri' => $iri,'ontology_id' => $ontology_id));
 	}
 
 	function delete($id)
 	{
-		$this->db->where("id", $id);
-		$this->db->delete("prefix");
+		$this->team->db->where("id", $id);
+		$this->team->db->delete("prefix");
 	}
 	
 }

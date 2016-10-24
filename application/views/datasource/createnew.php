@@ -31,7 +31,7 @@
 		</div>
 		<div class="field">
 			<label>Target ontology</label>
-			<div class="ui selection dropdown select-language">
+			<div id="target_dropdown" class="ui selection dropdown select-language">
 				<input name="input_ontology" type="hidden" value="fr-FR">
 				<div class="text">Select ontology...</div>
 				<i class="dropdown icon"></i>
@@ -57,8 +57,6 @@
 
 <script>
 
-$('.ui.dropdown')
-  .dropdown()
-;
+$('#target_dropdown').dropdown();
 
 </script>

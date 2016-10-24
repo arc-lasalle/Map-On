@@ -17,6 +17,12 @@ class Mapping_model extends CI_Model
 		$classTableArr = explode ("->", $tableRcolumn);
 		
 		if(count($classTableArr) == 2) {
+
+			$datasource = $this->datasource->getDatasource( $datasource_id );
+			if ( isset($datasource[0]->type) && ( $datasource[0]->type == "cvs" ) ) {
+				return $classTableArr[0];
+			}
+			
 		
 			$tables = Array();
 			$joins = Array();
@@ -437,7 +443,7 @@ class Mapping_model extends CI_Model
 	///////////////////////////////////////
 		
 	//Intern function
-	function generateURI($input_class, $input_table, $basic_uri, $ontology_id, $quotes = true)
+	function generateURI($datasource_id, $input_class, $input_table, $basic_uri, $ontology_id, $quotes = true)
 	{
 		$qname = $this->prefix->getQName($input_class, $ontology_id);
 		$arr = explode ("->", $input_table);
@@ -447,6 +453,12 @@ class Mapping_model extends CI_Model
 		$q = $quotes ? '"' : "";
 
 		if(count($arr2) == 2) {
+			
+			$datasource = $this->datasource->getDatasource( $datasource_id );
+			if ( isset($datasource[0]->type) && ( $datasource[0]->type == "cvs" ) ) {
+				return $basic_uri.strtolower($arr2[1]).'/{'. $q . strtolower($arr[1]) . $q .'}';
+			}
+			
 			if(count($arr) == 2) {
 				return $basic_uri.strtolower($arr2[1]).'/{'. $q . strtolower($arr[0].$arr[1]) . $q .'}';
 			} else {

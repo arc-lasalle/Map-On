@@ -34,7 +34,7 @@ class R2rml extends CI_Controller {
 		
 		$str = $prefixes.$part.$str;		
 		
-		$outputfilename = "./download/".$datasource_id."_R2RML.ttl";
+		$outputfilename = "./download/".$this->team->dir()."/".$datasource_id."_R2RML.ttl";
 		
 		$fp=fopen($outputfilename,'w');
 		fwrite($fp, $str, strlen($str));
@@ -84,7 +84,7 @@ class R2rml extends CI_Controller {
 	{
 		$datasource_id = $this->input->post('datasource_id');
 		$datasource_name = $this->datasource->getDatasource($datasource_id)[0]->name;
-        $datasource_path = "upload/datasources/" . $datasource_id."_".$datasource_name . "/source/";
+        $datasource_path = "upload/".$this->team->dir()."/datasources/" . $datasource_id."_".$datasource_name . "/source/";
 		$user_id = 1;
 		
 		if (is_uploaded_file($_FILES['input_r2rmlfile']['tmp_name'])) {
@@ -109,7 +109,7 @@ class R2rml extends CI_Controller {
 		
 		$output = $prefixes.$str;		
 		
-		$outputfilename = "./download/".$datasource_id."_R2RML.ttl";
+		$outputfilename = "./download/".$this->team->dir()."/".$datasource_id."_R2RML.ttl";
 		
 		$fp=fopen($outputfilename,'w');
 		fwrite($fp, $output, strlen($output));
@@ -158,7 +158,7 @@ class R2rml extends CI_Controller {
 	
 		//echo "Loading a R2RML file<br>";
 		
-		$file = "download/sigkdd_putative_sicilia.r2rml";
+		$file = "download/".$this->team->dir()."/sigkdd_putative_sicilia.r2rml";
 		
 		$this->r2rml->loadR2RML($file, $datasource_id);
 		

@@ -8,14 +8,14 @@ class Prefixes_model extends CI_Model {
     }
     
     function get_prefixes($num, $offset) {
-        $this->db->order_by("prefix", "ASC");
-        $query = $this->db->get('prefixes', $num, $offset);	
+        $this->team->db->order_by("prefix", "ASC");
+        $query = $this->team->db->get('prefixes', $num, $offset);	
         return $query->result();
     }
         
 	function get_prefix($uri) {
-        $this->db->where('uri', $uri);
-        $query = $this->db->get('prefixes');	
+        $this->team->db->where('uri', $uri);
+        $query = $this->team->db->get('prefixes');	
         return $query;
     }
 	
@@ -26,7 +26,7 @@ class Prefixes_model extends CI_Model {
             'color' => $color
         );
 
-        $this->db->insert('prefixes', $data); 
+        $this->team->db->insert('prefixes', $data); 
     }
     
     function modify($id,$uri,$prefix,$color){
@@ -36,8 +36,8 @@ class Prefixes_model extends CI_Model {
             'color' => $color
         );
 
-        $this->db->where('id', $id);
-        $this->db->update('prefixes', $data); 
+        $this->team->db->where('id', $id);
+        $this->team->db->update('prefixes', $data); 
     }
         
     function modifyPrefix($uri,$prefix){
@@ -45,18 +45,18 @@ class Prefixes_model extends CI_Model {
             'prefix' => $prefix,
         );
 
-        $this->db->where('uri', $uri);
-        $this->db->update('prefixes', $data); 
+        $this->team->db->where('uri', $uri);
+        $this->team->db->update('prefixes', $data); 
     }
 	
     function delete($id){
-        $this->db->where('id', $id);
-        $this->db->delete('prefixes'); 
+        $this->team->db->where('id', $id);
+        $this->team->db->delete('prefixes'); 
     }
     
     public function add_auto_prefix($uri){
-        $this->db->select_max('id');
-        $query_pre = $this->db->get('prefixes');
+        $this->team->db->select_max('id');
+        $query_pre = $this->team->db->get('prefixes');
         $query = $query_pre->result();
         
         $prefix_pre = $query[0]->id + 1;
@@ -68,7 +68,7 @@ class Prefixes_model extends CI_Model {
             'prefix' => $prefix
         );
 
-        $this->db->insert('prefixes', $data); 
+        $this->team->db->insert('prefixes', $data); 
         
         return $prefix;
     }
@@ -79,9 +79,9 @@ class Prefixes_model extends CI_Model {
 		
 		$qnameexp = explode(':', $qname);		
 		
-		$this->db->select('uri');
-        $this->db->where('prefix',$qnameexp[0]);
-        $prefixes_query_pre = $this->db->get('prefixes');
+		$this->team->db->select('uri');
+        $this->team->db->where('prefix',$qnameexp[0]);
+        $prefixes_query_pre = $this->team->db->get('prefixes');
         $prefixes_query = $prefixes_query_pre->result();
 		
 		if($prefixes_query == array())
@@ -110,9 +110,9 @@ class Prefixes_model extends CI_Model {
                 
                 $class_uri = explode('#', $uri);
                 
-                $this->db->select('uri, prefix');
-                $this->db->where('uri',$class_uri[0].'#');
-                $prefixes_query_pre = $this->db->get('prefixes');
+                $this->team->db->select('uri, prefix');
+                $this->team->db->where('uri',$class_uri[0].'#');
+                $prefixes_query_pre = $this->team->db->get('prefixes');
                 $prefixes_query = $prefixes_query_pre->result();
                  
                 //prefixed don't found in database
@@ -138,9 +138,9 @@ class Prefixes_model extends CI_Model {
                 
                 $class_uri = implode('/', array_slice($class_uri_pre, 0, count($class_uri_pre)-1)).'/';
                 
-                $this->db->select('prefix');
-                $this->db->where('uri',$class_uri);
-                $prefixes_query_pre = $this->db->get('prefixes');
+                $this->team->db->select('prefix');
+                $this->team->db->where('uri',$class_uri);
+                $prefixes_query_pre = $this->team->db->get('prefixes');
                 $prefixes_query = $prefixes_query_pre->result();
 
                 //prefixed don't found in database

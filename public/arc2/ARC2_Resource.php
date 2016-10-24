@@ -3,8 +3,8 @@
  * ARC2 Resource object
  *
  * @author Benjamin Nowack <bnowack@semsol.com>
- * @license http://arc.semsol.org/license
- * @homepage <http://arc.semsol.org/>
+ * @license W3C Software License and GPL
+ * @homepage <https://github.com/semsol/arc2>
  * @package ARC2
  * @version 2011-01-19
 */
@@ -35,7 +35,7 @@ class ARC2_Resource extends ARC2_Class {
     $this->index = $index;
   }
 
-  function getIndex($index) {
+  function getIndex() {
     return $this->index;
   }
 

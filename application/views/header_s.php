@@ -11,15 +11,15 @@
     <link rel="shortcut icon" href="<?php echo base_url(); ?>public/icons/favicon-semanco-32.png">
     <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Open+Sans:300italic,400,300,700' rel='stylesheet' type='text/css'>
 
-    <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>/public/Semantic-UI-2.1.8/semantic.css">
-	<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>/public/Semantic-UI-2.1.8/semanticMods.css">
+    <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>/public/libs/Semantic-UI-2.1.8/semantic.css">
+	<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>/public/libs/Semantic-UI-2.1.8/semanticmods.css">
 	<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>/public/css/homepage.css">
     <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>/public/css/codemirror.css">
     <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>/public/css/neat.css">
 
     <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.js"></script>
-    <script src="<?php echo base_url(); ?>/public/semanticui/semantic.js"></script>
-	<!--script src="<?php echo base_url(); ?>/public/Semantic-UI-2.1.8/semantic.min.js"></script-->
+    <!--script src="<?php echo base_url(); ?>/public/semanticui/semantic.js"></script-->
+	<script src="<?php echo base_url(); ?>/public/libs/Semantic-UI-2.1.8/semantic.min.js"></script>
     <script src="<?php echo base_url(); ?>/public/js/vivagraph.js" language="javascript" type="text/javascript" ></script>
     <script src="<?php echo base_url(); ?>/public/js/codemirror/codemirror.js" language="javascript" type="text/javascript" ></script>
     <script src="<?php echo base_url(); ?>/public/js/codemirror/turtle.js" language="javascript" type="text/javascript" ></script>
@@ -47,15 +47,22 @@
 		<div class='event'>
 		<div class='label'>
 			<?php 
-				if($log->type == "new") echo "<i class='green add square icon'></i>";  
-				else if($log->type == "edit") echo "<i class='blue edit icon'></i>"; 
-				else if($log->type == "delete") echo "<i class='red erase icon'></i>";
+				if($log->action == "new") echo "<i class='green add square icon'></i>";
+				else if($log->action == "edit") echo "<i class='blue edit icon'></i>";
+				else if($log->action == "delete") echo "<i class='red erase icon'></i>";
 			?>
 		
 		</div>
 		<div class='content'>
-			<div class="summary"><?php echo $log->first_name; ?>  <?php echo $log->last_name; ?><div class='date'><?php echo $log->date; ?></div></div>
-			<div class="extra text"><?php echo $log->action; ?></div>
+			<div class="summary">
+				<?php echo $log->user_name; ?>
+				<div class='date'>
+					<?php echo $log->date; ?>
+				</div>
+			</div>
+			<div class="extra text">
+				<?php echo $log->log_message; ?>
+			</div>
 		</div>
 		</div>
 		<?php } ?>
@@ -73,46 +80,69 @@
 	?>
 	</td></tr></table>
 	</h3>
-	<div class="ui small pointing menu">
-		<?php 
-			switch($this->uri->segment(1)) {
-				case "home" :	
-					echo '<a class="active item" href="'.base_url().'index.php/home">Home</a>';
-					if ($this->ion_auth->logged_in()) {
-						echo '<a class="item" href="'.base_url().'index.php/datasource">Data sources</a>';
-						echo '<a class="item" href="'.base_url().'index.php/ontology">Ontologies</a>';
-					}
-					echo '<a class="item" href="'.base_url().'index.php/help">Help</a>';
-					break;
-				case "ontology" :	
-					echo '<a class="item" href="'.base_url().'index.php/home">Home</a>';
-					echo '<a class="item" href="'.base_url().'index.php/datasource">Data sources</a>';
-					echo '<a class="active item" href="'.base_url().'index.php/ontology">Ontologies</a>';
-					echo '<a class="item" href="'.base_url().'index.php/help">Help</a>';
-					break;
-				case "help" :	
-					echo '<a class="item" href="'.base_url().'index.php/home">Home</a>';
-					if ($this->ion_auth->logged_in()) {
-						echo '<a class="item" href="'.base_url().'index.php/datasource">Data sources</a>';
-						echo '<a class="item" href="'.base_url().'index.php/ontology">Ontologies</a>';
-					}
-					echo '<a class="active item" href="'.base_url().'index.php/help">Help</a>';
-					break;
-				default:
-					
-					if ($this->ion_auth->logged_in()) {
-						echo '<a class="item" href="'.base_url().'index.php/home">Home</a>';
-						echo '<a class="active item" href="'.base_url().'index.php/datasource">Data sources</a>';
-						echo '<a class="item" href="'.base_url().'index.php/ontology">Ontologies</a>';
-						echo '<a class="item" href="'.base_url().'index.php/help">Help</a>';
-					} else {
-						echo '<a class="active item" href="'.base_url().'index.php/home">Home</a>';
-						echo '<a class="item" href="'.base_url().'index.php/help">Help</a>';
-					}
+		<div class="ui small pointing menu">
+		<?php
+			$tab = array_fill_keys( array('home', 'auth', 'datasource', 'ontology', 'help', 'admin'), '' );
 
+			$segment = $this->uri->segment(1);
+
+			if ( isset($tab[$segment]) ) $tab[$segment] .= ' active';
+
+			echo '<a class="item ' . $tab['home'] . $tab['auth'] . '" href="'.base_url().'index.php/home">Home</a>';
+			if ($this->ion_auth->logged_in()) {
+				echo '<a class="item ' . $tab['datasource'] . '" href="' . base_url() . 'index.php/datasource">Data sources</a>';
+				echo '<a class="item ' . $tab['ontology'] . '" href="' . base_url() . 'index.php/ontology">Ontologies</a>';
+			}
+			echo '<a class="item ' . $tab['help'] . '" href="'.base_url().'index.php/help">Help</a>';
+			if($this->ion_auth->is_admin()) {
+				echo '<a class="item ' . $tab['admin'] . '" href="'.base_url().'index.php/admin">Admin</a>';
 			}
 		?>
-	</div>
+			<div class="right menu">
+
+				<?php if ($this->ion_auth->logged_in() ) { ?>
+
+					<div id="team_dropdown" class="ui top right pointing dropdown" style="margin: 6px 25px 5px 5px;">
+						<div class="text">Team:&nbsp;&nbsp;<?php echo (isset($_SESSION['team_database'])) ? ($_SESSION['team_database']->name) : "None"; ?></div>
+						<i class="dropdown icon"></i>
+						<div class="menu">
+							<?php
+							$teams = $this->team->getTeams();
+							foreach( $teams as $t ) {
+								echo '<option value="' . $t->id . '" class="item active selected">' . $t->name . '</option>';
+							}
+							?>
+						</div>
+					</div>
+
+					<script>
+						$('#team_dropdown').dropdown({
+							onChange: function(value, text, $selectedItem) {
+								console.log("Entra");
+								$.post( "#",
+									{ set_team: $selectedItem[0].value },
+									function (data) {
+										<?php
+											$valid_urls = array('home', 'datasource', 'ontology', 'help', 'admin');
+											$url = base_url() . "index.php/" . $this->uri->segment(1);
+											if ( !in_array($this->uri->segment(1), $valid_urls) ) $url = base_url() . "index.php/datasource";
+										?>
+
+										window.location.href = "<?php echo $url; ?>";
+									}
+								);
+							}
+
+						});
+					</script>
+
+				<?php } ?>
+
+
+
+			</div>
+
+		</div>
 
 	<div class="ui horizontal segment">
 	
@@ -131,8 +161,9 @@
 	if ( $box_message ) {
 		if ( $box_message[0]  ) echo '<div class="ui success message">';
 		if ( !$box_message[0] ) echo '<div class="ui negative message">';
+		echo '<i class="close icon"></i>';
 		if ( isset($box_message[2]) ) {
-			echo '<div class="header"' . $box_message[1] . '</div>';
+			echo '<div class="header">' . $box_message[1] . '</div>';
 			echo $box_message[2];
 		} else {
 			echo $box_message[1];
@@ -140,3 +171,28 @@
 		echo '</div>';
 	}
 	?>
+	<script>
+		$('.message .close').on('click', function() {
+			$(this).closest('.message').transition('fade');
+		});
+
+        /*
+        if ( sessionStorage.getItem('tab_id') === null ) {
+            sessionStorage.setItem('tab_id', (new Date).getTime() );
+        }
+        document.cookie = 'tab_id=' + sessionStorage.getItem('tab_id') + ";path=/;";
+        */
+        /*
+         php_vars = [];
+         php_vars.base_url = '<?php echo base_url(); ?>';
+         php_vars.logged_in = <?php echo ($this->ion_auth->logged_in()==1) ? "true" : "false"  ?>;
+
+		 var isNewTab = (sessionStorage.getItem('newTab') === null);
+         sessionStorage.setItem('newTab', '0');
+		 if ( php_vars.logged_in && isNewTab ) {
+		 	window.location.href = php_vars.base_url + "/index.php/auth/login";
+		 }
+		*/
+
+
+	</script>

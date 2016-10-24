@@ -12,9 +12,9 @@ class R2rml_model extends CI_Model
 	
 	function getR2RMLPart($datasource_id)
 	{
-		$this->db->where('datasource_id', $datasource_id);
+		$this->team->db->where('datasource_id', $datasource_id);
 
-		$query = $this->db->get("r2rmlparts");
+		$query = $this->team->db->get("r2rmlparts");
 		$ret = "";
 		if(count($query->result()) > 0 ) {
 			$rows = $query->result();
@@ -26,17 +26,17 @@ class R2rml_model extends CI_Model
 	
 	function updateR2RMLPart($input_r2rmlpart, $user_id, $datasource_id)
 	{
-		$this->db->where('datasource_id', $datasource_id);
+		$this->team->db->where('datasource_id', $datasource_id);
 
-		$query = $this->db->get("r2rmlparts");
+		$query = $this->team->db->get("r2rmlparts");
 		
 		if(count($query->result()) > 0 ) {
 			$rows = $query->result();
 			
-			$this->db->where('id', $rows[0]->id);
-			$this->db->update('r2rmlparts', array('text' => $input_r2rmlpart,'user_id' => $user_id,'datasource_id' => $datasource_id, 'date' => date("Y-m-d")));
+			$this->team->db->where('id', $rows[0]->id);
+			$this->team->db->update('r2rmlparts', array('text' => $input_r2rmlpart,'user_id' => $user_id,'datasource_id' => $datasource_id, 'date' => date("Y-m-d")));
 		} else {
-			$this->db->insert('r2rmlparts', array('text' => $input_r2rmlpart,'user_id' => $user_id,'datasource_id' => $datasource_id, 'date' => date("Y-m-d")));
+			$this->team->db->insert('r2rmlparts', array('text' => $input_r2rmlpart,'user_id' => $user_id,'datasource_id' => $datasource_id, 'date' => date("Y-m-d")));
 		}
 
 	}

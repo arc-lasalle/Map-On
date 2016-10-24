@@ -11,18 +11,24 @@ class Ontology extends CI_Controller {
 		$this->load->model("Prefix_model", "prefix");
 		$this->load->model("Datasource_model", "datasource");
 		$this->load->model("Vowl_model", "vowl");
-//		$this->load->model("Log_model", "log");
+
+		if (!$this->ion_auth->logged_in()){
+			redirect('auth/login', 'refresh');
+		}
+		
 	}
 		
 	public function index()
 	{
-		if (!$this->ion_auth->logged_in()){
-			redirect('auth/login', 'refresh');
-		}
+		$this->maponrouting->setO();
 
 		
-		
-		$vars['ontologies'] = $this->ontology->getOntologies();
+		if ( $this->team->connected() ) {
+			$vars['ontologies'] = $this->ontology->getOntologies();
+		} else {
+			$vars['ontologies'] = [];
+		}
+
 		$vars["createnew"] = $this->createnew(true);
 
 		
@@ -36,16 +42,21 @@ class Ontology extends CI_Controller {
 	
 	public function view($ontology_id)
 	{
-		if (!$this->ion_auth->logged_in()){
-			redirect('auth/login', 'refresh');
-		}
+		if ( !isset($ontology_id) ) redirect("ontology");
+		
+		$this->maponrouting->setO( $ontology_id );
 		
 		$data["ontology_id"] = $ontology_id;
 		
 		$data["nprefixes"] = count($this->prefix->getPrefixes($ontology_id));
 		
 		$data["ontology"] = $this->ontology->getOntology($ontology_id);
-		
+
+		if ( empty($data["ontology"]) ) {
+			$this->session->set_flashdata('error_message', [false, "Ontology not found." ]);
+			redirect("ontology");
+		}
+
 		$data["modules"] = $this->ontology->getOntologyModules($ontology_id);
 		
 		$store_Mysql = $this->workspaces_model->connect_workspace("ontology_".$ontology_id);
@@ -65,9 +76,6 @@ class Ontology extends CI_Controller {
 	// This method return an OWL version of the ontology generated from the store.
 	public function viewowl($ontology_id)
 	{
-		if (!$this->ion_auth->logged_in()){
-			redirect('auth/login', 'refresh');
-		}
 		
 		$store_Mysql = $this->workspaces_model->connect_workspace("ontology_".$ontology_id);
 		
@@ -237,7 +245,7 @@ class Ontology extends CI_Controller {
 		if (is_uploaded_file($_FILES['input_attachment']['tmp_name'])) {
 
             $ontology_name = $this->ontology->getOntology($ontology_id)->name;
-            $ontology_dir = "upload/ontologies/" . $ontology_id . "_" . $ontology_name . "/source/";
+            $ontology_dir = "upload/".$this->team->dir()."/ontologies/" . $ontology_id . "_" . $ontology_name . "/source/";
             $file_name = $_FILES['input_attachment']['name'];
 
             if ( !is_dir($ontology_dir) ) mkdir($ontology_dir, 0777, true);
@@ -264,7 +272,8 @@ class Ontology extends CI_Controller {
 		}
 		
 			
-		$this->view($ontology_id);
+		//$this->view($ontology_id);
+		redirect('ontology/view/' . $ontology_id);
 	}
 
 	
@@ -277,7 +286,7 @@ class Ontology extends CI_Controller {
 		}
 
         $ontology_name = $this->ontology->getOntology($ontology_id)->name;
-        $ontology_dir = getcwd() . "/upload/ontologies/" . $ontology_id . "_" . $ontology_name;
+        $ontology_dir = getcwd() . "/upload/".$this->team->dir()."/ontologies/" . $ontology_id . "_" . $ontology_name;
 
         if ( is_dir($ontology_dir) ){
             if (PHP_OS === 'WINNT') {
@@ -341,21 +350,9 @@ class Ontology extends CI_Controller {
 	
 	function update()
 	{
-	/*
-		if (!$this->ion_auth->logged_in()){
-			redirect('auth/login', 'refresh');
-		}
-		*/
-		
-		
-		
 		//$vars["version"] = $this->energymodel->getVersion($store_Mysql);
-
 		//$this->energymodel->loadInferencedSuperClasses();
-		
 		//echo $vars["version"][0]['version'];
-		
-		
 		//redirect(base_url()."index.php/energymodel");
 	}
 
@@ -363,14 +360,8 @@ class Ontology extends CI_Controller {
 	/*
 	function inference()
 	{
-		if (!$this->ion_auth->logged_in()){
-			redirect('auth/login', 'refresh');
-		}
-		
 		$store_Mysql = $this->workspaces_model->connect_workspace("EnergyModel");
-
 		$this->energymodel->loadInferencedSuperClasses();
-				
 		//redirect(base_url()."index.php/admin");
 	}
 	*/

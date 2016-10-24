@@ -10,7 +10,7 @@
 
 
 <div class="ui stackable grid">
-	<div class="five wide column">
+	<div id="left_grid" class="five wide column">
 		<div class="ui green segment">
 
 			<!-- Mapping Options -->
@@ -84,6 +84,12 @@
 				</div>
 
 				<?php echo form_close(); ?>
+
+				<div class="ui small header">
+					<strong>Filtering tables of the data source</strong>
+				</div>
+
+				<div id="table_buttons"></div>
 			</div>
 
 			<!-- Ontology Options -->
@@ -228,10 +234,11 @@
 
 		</div>
 	</div>
-	<div class="eleven wide column">		
+	<div id="right_grid" class="eleven wide column">
 		<div class="ui green segment g_right_col">
 			<div class="ui small header">
 				<table width="100%"><tr><td>
+							<i id="horizontal_collapse" style="margin-left: -30px; position: fixed; color: gray;" class="caret left icon link"></i>
 					<div class="right_colum_title"><strong>Data source graph representation:</strong> <i>click on a column item to map it to a class</i></div>
 					</td><td style="text-align: right">		
 						<i class="circular history purple link icon" onclick="sidebar();" data-position="top left" data-html="click to too see the history log"></i>
@@ -290,6 +297,7 @@
 	<div class="actions"></div>
 </div>
 
+
 <script>
 	///////////////////////////////////////////////////
 	// JS functions for Datatype selection
@@ -302,13 +310,42 @@
 	$('.ui.accordion').accordion();
 	$('.ui.checkbox').checkbox();
 	
-	function sidebar()
-	{
+	function sidebar() {
 		 $('.sidebar').sidebar('toggle');
 	}
 
 
 	var settings = {
+		fields: {
+			input_dataproperty: {
+				identifier: 'input_dataproperty',
+				rules: [
+					{ type: 'check_data_property', prompt: 'Please enter a valid data property' },
+					{ type: 'empty', prompt : 'Please enter the data property for creating the mapping'},
+					{ type: 'not[Data property name...]', prompt : 'Please enter the data property for creating the mapping'	}
+				]
+			},
+			input_table: {
+				identifier: 'input_table',
+				rules: [
+					{ type: 'check_table', prompt: 'Please enter a valid table/column' },
+					{ type: 'empty', prompt : 'Please enter the column of a table for creating the mapping'}
+				]
+			},
+			input_value: {
+				identifier: 'input_value',
+				rules: [
+					{ type: 'empty', prompt : 'Please enter the value for creating the mapping'}
+				]
+			},
+			input_type: {
+				identifier: 'input_type',
+				rules: [
+					{ type: 'empty', prompt : 'Please enter the type of the data property'},
+					{ type: 'not[URI pattern...]', prompt : 'Please enter the type of the data property'}
+				]
+			}
+		},
 		rules: {
 			check_data_property: function () {
 				var found = false;
@@ -341,38 +378,8 @@
 		}
 	};
 
-	var rules = {
-			input_dataproperty: {
-				identifier: 'input_dataproperty',
-				rules: [
-					{ type: 'check_data_property', prompt: 'Please enter a valid data property' },
-					{ type: 'empty', prompt : 'Please enter the data property for creating the mapping'},
-					{ type: 'not[Data property name...]', prompt : 'Please enter the data property for creating the mapping'	}
-				]
-			},
-			input_table: {
-				identifier: 'input_table',
-			  	rules: [
-					{ type: 'check_table', prompt: 'Please enter a valid table/column' },
-					{ type: 'empty', prompt : 'Please enter the column of a table for creating the mapping'}
-				]
-			},
-			input_value: {
-				identifier: 'input_value',
-				rules: [
-					{ type: 'empty', prompt : 'Please enter the value for creating the mapping'}
-				]
-			},
-			input_type: {
-				identifier: 'input_type',
-				rules: [
-					{ type: 'empty', prompt : 'Please enter the type of the data property'},
-					{ type: 'not[URI pattern...]', prompt : 'Please enter the type of the data property'}
-				]
-			}
-	};
 
-	$('.ui.form').form(rules, settings);
+	$('.ui.form').form(settings);
 	
 	
 	function chk_suggestDataproperty(time){
@@ -408,20 +415,15 @@
 		document.getElementById('input_dataproperty').value = string_uri;
 		document.getElementById('hidden_search_inputtext_dataproperty').value = string_uri;
 		$("#suggest_Dataproperty").fadeOut();
-		
-		
-		/////////////////////////////////////////
-		// Code to modify the graph
 
-		
-		//alert('asdasd '+document.getElementById('nodeid').value);
-		
-		document.getElementById('action').value = "edit";
-		document.getElementById('nodeid').value = string_uri;
-		document.getElementById('table').value = document.getElementById('input_table').value.replace("->", "_");
 
-		$( "#centerForm" ).submit();
-    }
+		var nodeName = $('#input_dataproperty').val();
+		var table = $('#input_table').val().replace("->", "_").toLowerCase();
+
+		mappingGraph.drawTempNode( nodeName, table, 'dataProperty' );
+		mappingGraph.addLink( php_vars.mp_graph.classes[0].qname, 'tempnode', 'class-dataProperty' );
+
+	}
 	
 	///////////////////////////////////////////////////
 	// JS functions for Table selection
@@ -464,20 +466,24 @@
 		$.post('<?php echo site_url("mapping/generateDatapropertyValue"); ?>', { input_table: string_uri, datasource_id: <?php echo $datasource_id; ?> }, function(data) {
 			$('#input_value').val(data);
 		});
-		
-		//Changing the target
-		document.getElementById('action').value = "modify";
-		document.getElementById('nodeid').value = document.getElementById('input_dataproperty').value;
-		document.getElementById('table').value = document.getElementById('input_table').value.replace("->", "_");
 
-		$( "#centerForm" ).submit();
+		$.post('<?php echo site_url("mapping/getColumnType"); ?>', { input_table: string_uri, datasource_id: <?php echo $datasource_id; ?> }, function(data) {
+			$('#input_type').val(data);
+		});
+
+
+		var nodeName = $('#input_dataproperty').val();
+		var table = $('#input_table').val().replace("->", "_").toLowerCase();
+
+		mappingGraph.drawTempNode( nodeName, table, 'dataProperty' );
+		mappingGraph.addLink( php_vars.mp_graph.classes[0].qname, 'tempnode', 'class-dataProperty' );
+
+
+		var table = $('#input_table').val().toLowerCase().split("->");
+		mappingGraph.toggleTable( table[0], true );
     }
 	
-	//Init the form for the creation of the data property in the first time
-	document.getElementById('action').value = "add";
-	document.getElementById('nodeid').value = document.getElementById('input_dataproperty').value;
-	document.getElementById('table').value = document.getElementById('input_table').value.replace("->", "_");
-	//$( "#centerForm" ).submit();
+
 
 	function add_search_box_Class(string_uri){
 		if ( typeof ont_add_search_box_Class == 'function' ) {
@@ -489,10 +495,9 @@
 
 <!-- JS's -->
 <script type="text/javascript">
-	var php_vars = JSON.parse(unescape('<?php echo addslashes( json_encode($_ci_data['_ci_vars']) ); ?>'));
+	//var php_vars = JSON.parse(unescape('<?php echo addslashes( json_encode($_ci_data['_ci_vars']) ); ?>'));
 	php_vars.base_url = '<?php echo base_url(); ?>';
-	php_vars.db_tables = '<?php echo json_encode($tables); ?>';
-	php_vars.db_columns = '<?php echo json_encode($columns); ?>';
+
 </script>
 
 <script src="<?php echo base_url(); ?>/public/js/common/edition_area.js"></script>

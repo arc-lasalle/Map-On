@@ -29,6 +29,7 @@ Map-On tool has been developed in PHP using the framework Code Igniter. The grap
 - ARC, Appmosphere RDF classes – https://github.com/semsol/arc2/wiki
 - R2RML: RDB to RDF Mapping Language – http://www.w3.org/TR/r2rml/
 
+For the Map-On installation please go to the [Installation guide](./docs/installation.md)
 
 Copyright (C) 2016 ARC Engineering and Architecture La Salle, Ramon Llull University.
  

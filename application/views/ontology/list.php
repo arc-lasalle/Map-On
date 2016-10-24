@@ -24,9 +24,9 @@
 				<a href="<?php echo base_url();?>index.php/ontology/view/<?php echo $row->id; ?>">
 					<i class="edit link icon" style="color: black;" title="Edit ontology"></i>
 				</a>
-				<a onclick="loadVowl(<?php echo $row->id; ?>);">
+				<!--a onclick="loadVowl(<?php echo $row->id; ?>);">
 					<i class="unhide link icon" style="color: black;" title="View ontology"></i>
-				</a>
+				</a-->
 				<a href="<?php echo base_url();?>index.php/ontology/delete/<?php echo $row->id; ?>" onclick="return confirm('Are you sure?');">
 					<i class="remove link icon" style="color: red;" title="Delete ontology"></i>
 					<!--img src="<?php echo base_url();?>/public/img/delete.png" title="delete ontology"-->
@@ -37,8 +37,17 @@
 	</tbody>
 
 	<tfoot>
-		<tr><th colspan="3"><br/>
-			<div class="ui tiny button" onMouseUp="$('.ui.modal').modal('show');">add new ontology</div></th>
+		<tr>
+			<th colspan="3"><br/>
+				<?php
+					if ( $this->team->connected() ) {
+						echo '<div class="ui tiny button" onMouseUp="$(\'.ui.modal\').modal(\'show\');">add new ontology</div>';
+					} else {
+						echo 'Team not selected.';
+					}
+				?>
+
+			</th>
 		</tr>
 	</tfoot> 
 	</table> 
@@ -48,13 +57,13 @@
 <?php echo $createnew; ?>
 
 
-<!-- Ontology Graph - WebVOWL -->
+<!-- Ontology Graph - WebVOWL
 <div id="ea_loader" class="hidden"></div>
 <section id="canvasArea"></section>
+-->
 
 
-
-<!-- WebVowl JS's -->
+<!-- WebVowl JS's
 <script src="<?php echo base_url(); ?>/public/js/external/webvowl/d3.min.js"></script>
 <script src="<?php echo base_url(); ?>/public/js/external/webvowl/webvowl.js"></script>
 <script src="<?php echo base_url(); ?>/public/js/external/webvowl/webvowl.app.js"></script>
@@ -90,4 +99,4 @@
 			}
 		});
 	}
-</script>
+</script>-->

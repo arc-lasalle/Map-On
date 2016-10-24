@@ -17,7 +17,6 @@ $(document).ready(function () {
     ea.options.ont_center_node = php_vars.uriMappedClass;
     ea.options.dbgraph_center_table = php_vars.sourcetable_name;
 
-    console.log("Center1: ",ea.options.ont_center_node );
 
     $('#btn_show_mapping').click( function (){ ea.showGraph(0) } );
     $('#btn_show_ontology').click( function (){ ea.showGraph(1) } );

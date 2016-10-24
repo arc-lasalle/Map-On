@@ -21,7 +21,7 @@ class Workspaces extends CI_Controller {
         $id = $this->input->post('id');
         
         // upload file
-        $target_path = "./upload/";
+        $target_path = "./upload/".$this->team->dir()."/";
         $target_path = $target_path . basename( $_FILES[$id.'_owl_file_input']['name']); 
         
         if ((($_FILES[$id."_owl_file_input"]["type"] == "application/octet-stream") || ($_FILES[$id."_owl_file_input"]["type"] == "application/rdf+xml")) && ($_FILES[$id."_owl_file_input"]["size"] < 6000000)){
@@ -43,7 +43,7 @@ class Workspaces extends CI_Controller {
                 include_once("public/arc2/ARC2.php");
                 
                 $parser = ARC2::getRDFParser();
-                $parser->parse(base_url('upload/'.$_FILES[$id.'_owl_file_input']['name']));
+                $parser->parse(base_url('upload/'.$this->team->dir()."/".$_FILES[$id.'_owl_file_input']['name']));
                 $triples = $parser->getTriples();
                 
                 //config of mysql and add triples to it.

@@ -23,6 +23,10 @@ $(document).ready(function() {
         }
     });
 
+    $('.avoid_right_click').contextmenu( function() {
+        return false; // Avoid right click menu
+    });
+
 });
 
 // Get uri from QName
@@ -55,3 +59,4 @@ function gl_getQName( prefixes, URI ) {
 
     return res;
 }
+

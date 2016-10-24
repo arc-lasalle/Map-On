@@ -122,7 +122,7 @@ editionArea.prototype.loadVowl = function() {
 
     $.ajax({
         type: "POST",
-        url: php_vars.base_url + "index.php/ontology/getvowl/" + php_vars.datasource_id,
+        url: php_vars.base_url + "index.php/ontology/getvowl/" + php_vars.routes.datasource_id,
         success: function( data ) {
             try {
                 self.webvowl_app.loadVowlFile(data);
@@ -144,7 +144,7 @@ editionArea.prototype.loadVowl = function() {
     function saveLayoutOntology ( node_uri, save, pos_x, pos_y ) {
         $.ajax({
             type: "POST",
-            url: php_vars.base_url + "index.php/ontology/saveOntologyLayout/" + php_vars.datasource_id,
+            url: php_vars.base_url + "index.php/ontology/saveOntologyLayout/" + php_vars.routes.datasource_id,
             data: {"node_uri":node_uri, "save":save, "pos_x":pos_x, "pos_y":pos_y},
             success: function( data ) {
                 //console.log("Saved");
@@ -211,30 +211,31 @@ editionArea.prototype.loadDbgraph = function() {
 
     dbGraph_initialize( function( graph ){
         var table_cols, table, col, fk_origin, fk_dest;
-        var tables = JSON.parse(php_vars.db_tables);
-        var cols = JSON.parse(php_vars.db_columns);
+        var tables = php_vars.dbgraph_layout;
+        //var cols = JSON.parse(php_vars.db_columns);
         var layout = php_vars.dbgraph_layout;
 
         self.dbgraph_app = graph;
 
         // Add tables and rows
         for ( var i = 0; i < tables.length; i++ ) {
-            var table = graph.mapon_addTable( tables[i].name, 300, 100 + (100*i) )
+            var table = graph.mapon_addTable( tables[i].name, 300, 100 + (100*i) );
 
-            table_cols = cols[tables[i].id];
+            //table_cols = cols[tables[i].id];
+            table_cols = tables[i].columns;
 
-            for ( var k = 0; k < table_cols.length; k++ ) {
-
-                col = graph.mapon_addRow( table, table_cols[k].name, (table_cols[k].primarykey == 1), table_cols[k].type );
-
+            if ( typeof table_cols !== 'undefined' ) {
+                for ( var k = 0; k < table_cols.length; k++ ) {
+                    col = graph.mapon_addRow( table, table_cols[k].name, (table_cols[k].primarykey == 1), table_cols[k].type );
+                }
             }
+
 
         }
 
         // Add FK's
         for ( var i = 0; i < tables.length; i++ ) {
-
-            table_cols = cols[tables[i].id];
+            table_cols = tables[i].columns;
 
             for ( var k = 0; k < table_cols.length; k++ ) {
 
@@ -245,17 +246,17 @@ editionArea.prototype.loadDbgraph = function() {
                     graph.mapon_addForeginKey( fk_origin, fk_dest );
                 }
             }
-
         }
-
-
 
         graph.alignTables();
         graph.sync();
 
-        for ( var i = 0; i < layout.length; i++ ) {
-            graph.mapon_moveTable( layout[i].tableid, layout[i].layoutX, layout[i].layoutY );
+        for ( var i = 0; i < tables.length; i++ ) {
+            if ( tables[i].layoutX == 0 && tables[i].layoutY == 0 ) continue;
+            console.log("Entra");
+            graph.mapon_moveTable( tables[i].name, tables[i].layoutX, tables[i].layoutY );
         }
+
         graph.sync();
         graph.mapon_setClickElementCallback( self.dbgraph_showElementInfo );
         graph.mapon_setMoveTableCallback( saveDbgraphTableLayout );
@@ -270,7 +271,7 @@ editionArea.prototype.loadDbgraph = function() {
 
             $.ajax({
                 type: "POST",
-                url: php_vars.base_url + "index.php/datasource/saveDbgraphLayout/" + php_vars.datasource_id,
+                url: php_vars.base_url + "index.php/datasource/saveDbgraphLayout/" + php_vars.routes.datasource_id,
                 data: {"table_id":data.table.title, "save":true, "pos_x":data.table.x, "pos_y":data.table.y},
                 success: function( data ) {
                     //console.log("Saved");
@@ -318,6 +319,19 @@ $('.ea_dataproperty_search_box').keyup(function(){ ea.showSearchBox("data_proper
 $('.ea_table_search_box, .ea_table_search_box + i').click( function() { ea.showSearchBox("table", 0); });
 $('.ea_table_search_box').keyup(function(){ ea.showSearchBox("table", 500); });
 
+$('#horizontal_collapse').click( function() {
+    var visible = $('#left_grid').is(":visible");
+    if ( visible ) {
+        $('#left_grid').hide();
+        $('#horizontal_collapse').removeClass('left').addClass('right');
+        $('#right_grid').removeClass('eleven wide').addClass('sixteen wide');
+    } else {
+        $('#left_grid').show();
+        $('#horizontal_collapse').removeClass('right').addClass('left');
+        $('#right_grid').removeClass('sixteen wide').addClass('eleven wide');
+    }
+
+});
 
 
 editionArea.prototype.showSearchBox = function( type, timeout ) {
@@ -327,7 +341,7 @@ editionArea.prototype.showSearchBox = function( type, timeout ) {
     if ( timeout !== undefined && timeout != 0 ) {
         clearTimeout( ea_timer );
         var self = this;
-        ea_timer = setTimeout( function() { self.showSearchBox(0); }, timeout);
+        ea_timer = setTimeout( function() { self.showSearchBox(type); }, timeout);
         return;
     }
 
@@ -342,15 +356,15 @@ editionArea.prototype.showSearchBox = function( type, timeout ) {
         url = php_vars.base_url + 'index.php/mapping/suggestdataproperty';
         data = {
             string: $(container_selector+'.ea_dataproperty_search_box').val(),
-            class: php_vars.mappedclass_id,
-            datasource_id: php_vars.datasource_id
+            class: php_vars.routes.mappedclass_id,
+            datasource_id: php_vars.routes.datasource_id
         };
     } else if ( type == "class" ) {
         div_selector = ".ea_class_search_results";
         url = php_vars.base_url + 'index.php/mapping/suggestclass';
         data = {
             string: $(container_selector+'.ea_class_search_box').val(),
-            datasource_id: php_vars.datasource_id
+            datasource_id: php_vars.routes.datasource_id
         };
 
     } else if ( type == "table" ) {
@@ -358,7 +372,7 @@ editionArea.prototype.showSearchBox = function( type, timeout ) {
         url = php_vars.base_url + 'index.php/mapping/suggesttable';
         data = {
             string: $(container_selector+'.ea_table_search_box').val(),
-            datasource_id: php_vars.datasource_id
+            datasource_id: php_vars.routes.datasource_id
         };
     }
 

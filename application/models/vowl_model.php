@@ -19,10 +19,10 @@ class Vowl_model extends CI_Model
 		$owl_file_path = "/upload/owl/".$ontology_id."_".$ont->name.".owl";
 
         // Get .owl file name from db
-        $this->db->select( "file" );
-        $this->db->from( "ontology_modules" );
-        $this->db->where( "ontology_id", $ontology_id );
-        $result = $this->db->get()->result();
+        $this->team->db->select( "file" );
+        $this->team->db->from( "ontology_modules" );
+        $this->team->db->where( "ontology_id", $ontology_id );
+        $result = $this->team->db->get()->result();
 		
         if ( !isset($result[0]->file) ) return $ret;
         $owl_file_path = $result[0]->file;
@@ -32,7 +32,7 @@ class Vowl_model extends CI_Model
 		$json_file_path = "/upload/vowl/" . $owl_file_path_parts['filename'] . ".json";
         */
 
-        $base_path = "/upload/ontologies/" . $ontology_id."_".$ont->name . "/";
+        $base_path = "/upload/".$this->team->dir()."/ontologies/" . $ontology_id."_".$ont->name . "/";
         $owl_file_path = $base_path . $ont->name.".owl";
         $json_file_path = $base_path . $ont->name.".json";
 

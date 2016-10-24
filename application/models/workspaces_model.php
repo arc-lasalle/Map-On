@@ -15,17 +15,17 @@ class Workspaces_model extends CI_Model {
             'name' => strtolower($name),
             'endpoint' => $endpoint,
         );
-        $this->db->insert('workspaces', $data);
+        $this->team->db->insert('workspaces', $data);
         
         include_once("public/arc2/ARC2.php");
 
         // Config mysql
         $config_Mysql = array(
             // db 
-            'db_host' => $this->db->hostname, // default: localhost
-            'db_name' => $this->db->database,
-            'db_user' => $this->db->username,
-            'db_pwd' => $this->db->password,
+            'db_host' => $this->team->db->hostname, // default: localhost
+            'db_name' => $this->team->db->database,
+            'db_user' => $this->team->db->username,
+            'db_pwd' => $this->team->db->password,
             // store 
             'store_name' => $name,
         );
@@ -54,8 +54,8 @@ class Workspaces_model extends CI_Model {
             'endpoint' => $endpoint,
         );
         
-        $this->db->where('id', $id);
-        $this->db->update('workspaces', $data);
+        $this->team->db->where('id', $id);
+        $this->team->db->update('workspaces', $data);
         
         //echo "END FUNCTION modify(id,name,endpoint) Workspaces_model.php<br />";
     }
@@ -63,8 +63,8 @@ class Workspaces_model extends CI_Model {
     function find_data_workspace($name){
         //echo "FUNCTION find_data_workspace(name) Workspaces_model.php<br />";
         
-        $this->db->where('name', $name);
-        $workspaces = $this->db->get('workspaces');
+        $this->team->db->where('name', $name);
+        $workspaces = $this->team->db->get('workspaces');
         return $workspaces->result();
         
         //echo "END FUNCTION find_data_workspace(name) Workspaces_model.php<br />";
@@ -74,9 +74,9 @@ class Workspaces_model extends CI_Model {
     function first_workspace(){
         //echo "FUNCTION first_workspace() Workspaces_model.php<br />";
         
-        $this->db->select('name');
-        $this->db->select_min('id');
-        $workspaces_pre = $this->db->get('workspaces');
+        $this->team->db->select('name');
+        $this->team->db->select_min('id');
+        $workspaces_pre = $this->team->db->get('workspaces');
         $workspace = $workspaces_pre->result();
         if(isset($workspace[0])){
             return $workspace[0]->name;
@@ -95,10 +95,10 @@ class Workspaces_model extends CI_Model {
         // Config mysql
         $config_Mysql = array(
             // db 
-            'db_host' => $this->db->hostname, // default: localhost
-            'db_name' => $this->db->database,
-            'db_user' => $this->db->username,
-            'db_pwd' => $this->db->password,
+            'db_host' => $this->team->db->hostname, // default: localhost
+            'db_name' => $this->team->db->database,
+            'db_user' => $this->team->db->username,
+            'db_pwd' => $this->team->db->password,
             // store 
             'store_name' => $name,
         );
@@ -128,9 +128,9 @@ class Workspaces_model extends CI_Model {
             $color = ', $color: "'.$colors[$prefixed].'"';
         }else{
             
-            $this->db->select('color');
-            $this->db->where('prefix',$prefixed);
-            $color_quey = $this->db->get('prefixes');
+            $this->team->db->select('color');
+            $this->team->db->where('prefix',$prefixed);
+            $color_quey = $this->team->db->get('prefixes');
             $new_color = $color_quey->result();
             
             if($new_color != null){
@@ -148,9 +148,9 @@ class Workspaces_model extends CI_Model {
                 }
                 $this->session->set_userdata('nextcolors', $nextcolors);
 
-                $this->db->select('color');
-                $this->db->where('id',$nextcolors);
-                $color_query = $this->db->get('colors');
+                $this->team->db->select('color');
+                $this->team->db->where('id',$nextcolors);
+                $color_query = $this->team->db->get('colors');
                 $new_color = $color_query->result();
 
                 $new_color_for = $new_color[0]->color ;
@@ -169,9 +169,9 @@ class Workspaces_model extends CI_Model {
     public function get_workspace_id($workspace_name){
         //echo "FUNCTION get_workspace_id(workspace_name) Workspaces_model.php<br />";
         
-        $this->db->select('id');
-        $this->db->where('name', $workspace_name);
-        $workspace_pre = $this->db->get('workspaces');
+        $this->team->db->select('id');
+        $this->team->db->where('name', $workspace_name);
+        $workspace_pre = $this->team->db->get('workspaces');
         
         $workspace = $workspace_pre->result();
         

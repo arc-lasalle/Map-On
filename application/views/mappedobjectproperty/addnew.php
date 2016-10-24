@@ -10,7 +10,7 @@
 
 
 <div class="ui stackable grid">
-	<div class="five wide column">
+	<div id="left_grid" class="five wide column">
 		<div class="ui green segment g_left_col" >
 
 			<!-- Mapping Options -->
@@ -24,8 +24,8 @@
 
 						<div class="ui form secondary accordion fluid segment" >
 						<?php 	echo form_open_multipart(base_url().'index.php/mappedobjectproperty/addnew_post');
-								echo form_hidden('mappingspace_id', $mappingspace_id);
-								echo form_hidden('datasource_id', $datasource_id);
+								echo form_hidden('mappingspace_id', $routes['mappingspace_id']);
+								echo form_hidden('datasource_id', $routes['datasource_id']);
 								echo form_hidden('mappedclassdomain_id', $mappedclassdomain_id);
 						?>
 
@@ -57,7 +57,7 @@
 									<label>Target class</label>
 									<div class="ui selection dropdown" data-content="Type for searching a data property of the ontology">
 										<input type="hidden" name="input_target">
-										<div class="text">Select a target...</div>
+										<div id="selected_target" class="text">Select a target...</div>
 										<i class="dropdown icon"></i>
 										<div class="menu" id="input_target">
 										</div>
@@ -95,7 +95,7 @@
 							</div>
 
 							<div class="actions">
-								<input type="submit" value="Add" class="ui tiny button" /> <div class="ui tiny button" style= "right: 11px; position: absolute;"  onmouseup="window.location.href = '<?php echo base_url();?>index.php/mappingspace/graph/<?php echo $datasource_id."/".$mappingspace_id; ?>';">Cancel</div>
+								<input type="submit" value="Add" class="ui tiny button" /> <div class="ui tiny button" style= "right: 11px; position: absolute;"  onmouseup="window.location.href = '<?php echo base_url();?>index.php/mappingspace/graph/<?php echo $routes['datasource_id']."/".$routes['mappingspace_id']; ?>';">Cancel</div>
 							</div>
 							<div class="ui error message"></div>
 						</div>
@@ -105,30 +105,8 @@
 						<div class="ui small header">
 							<strong>Filtering tables of the data source</strong>
 						</div>
-						<div class="ui form secondary accordion fluid segment" >
-							<div class="two fields">
-								<div class="  field">
-									<label>List of tables:</label>
-								</div>
-								<div class="  field">
-									<div class="ui mini left attached compact positive check button">Check all</div> <div class="ui mini right attached compact negative uncheck button">Uncheck all</div>
-								</div>
-							</div>
-							<?php foreach($tables as $row) { ?>
-							<div class="field">
-								<div class="ui toggle checkbox" id= "table_id_<?php echo strtolower($row->name); ?>">
-									<?php if(!array_key_exists(strtolower($row->name), $tableson)) {
-										echo '<input type="checkbox" name="public" ID="table_'.strtolower($row->name).'" >';
-									} else {
-										echo '<input type="checkbox" name="public" checked="checked" ID="table_'.strtolower($row->name).'" >';
-									}
-									?>
-								  <label><?php echo $row->name; ?></label>
-								</div>
-								</div>
-							<?php } ?>
-
-						</div>
+					
+						<div id="table_buttons"></div>
 
 				</div>
 			</div>
@@ -280,11 +258,16 @@
 
 		</div>
 	</div>
-	<div class="eleven wide column">		
+	<div id="right_grid" class="eleven wide column">
 		<div class="ui green segment g_right_col">
-			<div class="ui small header" class="right_colum_title">
-				<strong>Data source graph representation:</strong> <i>click on a column item to map it to a class</i>
+			<div class="ui small header">
+				<table width="100%"><tr><td>
+							<i id="horizontal_collapse" style="margin-left: -30px; position: fixed; color: gray;" class="caret left icon link"></i>
+							<div class="right_colum_title"><strong>Data source graph representation:</strong> <i>click on a column item to map it to a class</i></div>
+						</td><td style="text-align: right">
+							</td></tr></table>
 			</div>
+
 			<div class="content field">
 
 				<div id="ea_loader" class="hidden"></div>
@@ -354,6 +337,35 @@
 	$('.table.checkbox').checkbox('attach events', '.uncheck.button', 'uncheck');
 
 	var settings = {
+        fields: {
+            input_objectproperty: {
+                identifier  : 'input_objectproperty',
+                rules: [
+                    { type: 'check_object_property', prompt: 'Please enter a valid object property' },
+                    { type   : 'empty', prompt : 'Please enter the object property for creating the mapping'},
+                    { type   : 'not[Object property name...]', prompt : 'Please enter the object property for creating the mapping'	}
+                ]
+            },
+            input_table: {
+                identifier  : 'input_table',
+                rules: [
+                    { type: 'check_table', prompt: 'Please enter a valid table/column' },
+                    { type   : 'empty', prompt : 'Please enter the column of a table for creating the mapping'}
+                ]
+            },
+            input_target: {
+                identifier  : 'input_target',
+                rules: [
+                    { type   : 'empty', prompt : 'Please select a target class for the object property'}
+                ]
+            },
+            input_uri: {
+                identifier  : 'input_uri',
+                rules: [
+                    { type   : 'empty', prompt : 'Please enter the URI for creating the mapping'}
+                ]
+            }
+        },
 		rules: {
 			check_object_property: function () {
 				var found = false;
@@ -386,38 +398,7 @@
 		}
 	};
 
-	var rules = {
-			input_objectproperty: {
-				identifier  : 'input_objectproperty',
-			  	rules: [
-					{ type: 'check_object_property', prompt: 'Please enter a valid object property' },
-					{ type   : 'empty', prompt : 'Please enter the object property for creating the mapping'},
-					{ type   : 'not[Object property name...]', prompt : 'Please enter the object property for creating the mapping'	}
-				]
-			},
-			input_table: {
-				identifier  : 'input_table',
-			  	rules: [
-					{ type: 'check_table', prompt: 'Please enter a valid table/column' },
-					{ type   : 'empty', prompt : 'Please enter the column of a table for creating the mapping'}
-				]
-			},
-			input_target: {
-				identifier  : 'input_target',
-			  	rules: [
-					{ type   : 'empty', prompt : 'Please select a target class for the object property'}
-				]
-			},
-			input_uri: {
-				identifier  : 'input_uri',
-			  	rules: [
-					{ type   : 'empty', prompt : 'Please enter the URI for creating the mapping'}
-				]
-			}
-	};
-
-
-	$('.ui.form').form(rules, settings);
+	$('.ui.form').form(settings);
 
 	$('.dropdown').dropdown({
 		onChange: function() { 
@@ -432,13 +413,7 @@
 
 	$('.ui.checkbox').checkbox();
 	
-	<?php foreach($tables as $row) { ?>
-	$("#table_id_<?php echo strtolower($row->name); ?>").checkbox('setting', 'onChange', function () {
-		chk_toggleTable("<?php echo strtolower($row->name); ?>", document.getElementById("table_<?php echo strtolower($row->name); ?>").checked );
-	});
-	$("#table_id_<?php echo strtolower($row->name); ?>").checkbox('attach events', '.check.button', 'check');
-	$("#table_id_<?php echo strtolower($row->name); ?>").checkbox('attach events', '.uncheck.button', 'uncheck');
-	<?php } ?>
+
 	
 	
 	//Toggle table nodes in the graph
@@ -452,8 +427,7 @@
 			toggleTable(element, status);
 			
 		} else {
-			//document.getElementById("table_<?php echo $row->name; ?>").checked = !document.getElementById("table_<?php echo $row->name; ?>").checked;
-			
+
 			$("#table_id_"+element).checkbox('setting', 'onChange', function () {});
 			if(status){
 				$("#table_id_"+element).checkbox('check');
@@ -481,7 +455,7 @@
 		$( "#centerForm" ).submit();
 		
 		$.ajax({ url: '<?php echo base_url().'index.php/mappedclass/storetableson'; ?>',
-				 data: {mappedclass_id: <?php echo $mappedclass_id; ?>, tableid: element, onoff: status},
+				 data: {mappedclass_id: php_vars.routes.mapped_class_id, tableid: element, onoff: status},
 				 type: 'post',
 				 success: function(output) {}
 		});
@@ -502,7 +476,7 @@
 		// Show loader until receiving load() data.
 		$("#suggest_Objectproperty").html('<div class="ui inverted active dimmer"><div class="ui mini text loader">Searching....</div></div><br/><br/>');
 
-		$("#suggest_Objectproperty").load('<?php echo site_url("mapping/suggestobjectproperty"); ?>', { string: document.getElementById('input_objectproperty').value, class: '<?php echo $uriMappedClass; ?>', datasource_id: <?php echo $datasource_id; ?> } );
+		$("#suggest_Objectproperty").load(php_vars.routes.base_url+'index.php/mapping/suggestobjectproperty', { string: document.getElementById('input_objectproperty').value, class: '<?php echo $uriMappedClass; ?>', datasource_id: <?php echo $datasource_id; ?> } );
 
 		//var position = $("#input_objectproperty").position();
 		//document.getElementById('suggest_Objectproperty').style.top = position.top + 66 + "px";
@@ -521,13 +495,12 @@
 		$("#suggest_Objectproperty").fadeOut();
 		
 		//To autocomplete the VALUE section
-		//$("#input_uri").load('<?php echo site_url("mapping/generateObjectpropertyURI"); ?>', { input_object: string_uri, datasource_id: <?php echo $datasource_id; ?> } );
-		$.post('<?php echo site_url("mapping/generateObjectpropertyURI"); ?>',  { input_object: string_uri, datasource_id: <?php echo $datasource_id; ?>, input_table :  document.getElementById('input_table').value}, function(data) {
+		$.post(php_vars.routes.base_url+"index.php/mapping/generateObjectpropertyURI",  { input_object: string_uri, datasource_id: <?php echo $datasource_id; ?>, input_table :  document.getElementById('input_table').value}, function(data) {
 				//alert(data);
 				$('#input_uri').val(data);
 			});
 		
-		$("#input_target").load('<?php echo site_url("mapping/generateObjectpropertyTarget"); ?>', { input_object: string_uri, mappingspace_id: <?php echo $mappingspace_id; ?>, datasource_id: <?php echo $datasource_id; ?> }, function() { 
+		$("#input_target").load(php_vars.routes.base_url+"index.php/mapping/generateObjectpropertyTarget", { input_object: string_uri, mappingspace_id: php_vars.routes.mappingspace_id, datasource_id: php_vars.routes.datasource_id }, function() {
 				//alert("loaded"); 
 				$('.dropdown').dropdown({
 					onChange: function() { 
@@ -539,23 +512,36 @@
 							$('.dropdown').dropdown('set selected', '1');
 						}
 						
-						$.post('<?php echo site_url("mapping/generateObjectpropertyURI"); ?>',  { input_object: string_uri, datasource_id: <?php echo $datasource_id; ?>, input_table :  document.getElementById('input_table').value }, function(data) {
+						$.post(
+                            php_vars.routes.base_url+"index.php/mapping/generateObjectpropertyURI",
+                            { input_object: string_uri, datasource_id: php_vars.routes.datasource_id, input_table :  document.getElementById('input_table').value },
+                            function(data) {
 									//alert(data);
 									$('#input_uri').val(data);
-								});
-								
-						
-						document.getElementById('action').value = "edit";
-						document.getElementById('nodeid').value = value[0].replace("New:#:", " ");
-						document.getElementById('objectprop').value = document.getElementById('input_objectproperty').value;
-						document.getElementById('table').value = document.getElementById('input_table').value.replace("->", "_");
+                            });
 
-						$( "#centerForm" ).submit();
+
+                        var nodeName = $('#selected_target').text();
+                        var linklabel = $('#input_objectproperty').val();
+                        var table = $('#input_table').val().replace("->", "_").toLowerCase();
+
+                        mappingGraph.drawTempNode( nodeName, table, 'class' );
+                        mappingGraph.addLink( php_vars.mp_graph.classes[0].qname, 'tempnode', 'class-class', linklabel );
+
+
+
 					}
 				});
 	
 			} );
 
+
+        var nodeName = $('#selected_target').text();
+        var linklabel = $('#input_objectproperty').val();
+        var table = $('#input_table').val().replace("->", "_").toLowerCase();
+
+        mappingGraph.drawTempNode( nodeName, table, 'class' );
+        mappingGraph.addLink( php_vars.mp_graph.classes[0].qname, 'tempnode', 'class-class', linklabel );
     }
 	
 	///////////////////////////////////////////////////
@@ -577,7 +563,7 @@
 		// Show loader until receiving load() data.
 		$("#suggest_Table").html('<div class="ui inverted active dimmer"><div class="ui mini text loader">Searching....</div></div><br/><br/>');
 
-		$("#suggest_Table").load('<?php echo site_url("mapping/suggesttable"); ?>', { string: document.getElementById('input_table').value, datasource_id: <?php echo $datasource_id; ?> } );
+		$("#suggest_Table").load(php_vars.routes.base_url+"index.php/mapping/suggesttable", { string: document.getElementById('input_table').value, datasource_id: php_vars.routes.datasource_id } );
 
 		//var position = $("#suggest_Table").position();
 		//alert("Div: "+position.top+" "+ position.left);
@@ -608,28 +594,21 @@
 				//alert(data);
 				$('#input_uri').val(data);
 			});
-		
-		var value = $('.dropdown').dropdown('get value');
-		
-		//Changing the target
-		document.getElementById('action').value = "modify";
-		document.getElementById('nodeid').value = value[0].replace("New:#:", " ");
-		document.getElementById('table').value = document.getElementById('input_table').value.replace("->", "_");
 
-		$( "#centerForm" ).submit();
-		
-		//toogle checkbox of the table filter if needed
-		var res = document.getElementById('table').value.toLowerCase().split("_");
-		if(res.length > 1) {
-			toggleTable(res[0], true);
-			$("#table_id_"+res[0]).checkbox('check');
-		}
+
+        var nodeName = $('#selected_target').text();
+        var linklabel = $('#input_objectproperty').val();
+        var table = $('#input_table').val().replace("->", "_").toLowerCase();
+
+        mappingGraph.drawTempNode( nodeName, table, 'class' );
+        mappingGraph.addLink( php_vars.mp_graph.classes[0].qname, 'tempnode', 'class-class', linklabel );
+
+        var table = $('#input_table').val().toLowerCase().split("->");
+        mappingGraph.toggleTable( table[0], true );
+
+	
 	}
 	
-		//Init the form for the creation of the data property in the first time
-	document.getElementById('action').value = "add";
-	document.getElementById('nodeid').value = document.getElementById('input_objectproperty').value;
-	document.getElementById('table').value = document.getElementById('input_table').value.replace("->", "_");
 
 
 	function add_search_box_Class(string_uri){
@@ -650,19 +629,7 @@
 
 <!-- JS's -->
 <script type="text/javascript">
-	var php_vars = JSON.parse(unescape('<?php echo addslashes( json_encode($_ci_data['_ci_vars']) ); ?>'));
 	php_vars.base_url = '<?php echo base_url(); ?>';
-	php_vars.db_tables = '<?php echo json_encode($tables); ?>';
-	php_vars.db_columns = '<?php echo json_encode($columns); ?>';
-
-	/*var php_base_url = '<?php echo base_url(); ?>';
-	var php_datasource_id = '<?php echo $datasource_id; ?>';
-	var php_ontology_layout = '<?php echo json_encode($ontology_layout); ?>';
-	var php_uri_mapped_class = '<?php echo $uriMappedClass; ?>';
-	var php_prefixes = '<?php echo $prefixes; ?>';
-	var php_class = '<?php echo $class; ?>';
-	var php_db_tables = '<?php echo json_encode($tables); ?>';
-	var php_db_columns = '<?php echo json_encode($columns); ?>';*/
 </script>
 
 <script src="<?php echo base_url(); ?>/public/js/common/edition_area.js"></script>

@@ -92,6 +92,8 @@ class Mapping extends CI_Controller {
 		//Get all classes
 		$classes = $this->ontology->getClassesAndAnnotations($store_Mysql);
 		echo '<div style="line-height: 1.4em;" class="gl_clickOut_hide">';
+
+		
 		for($i=0; $i < count($classes); $i++){
 			$qName = $this->prefix->getQName($classes[$i]['class'], $ontology_id);
 			$strComment = isset ($classes[$i]['comment']) ? '<span><i>'.$classes[$i]['comment'].'</i></span><br />' : "";
@@ -380,6 +382,14 @@ class Mapping extends CI_Controller {
 		echo $this->mapping->generateDatapropertyValue($input_table); 
 	}
 	
+	function getColumnType() {
+		$datasource_id = $this->input->post('datasource_id');
+		$input_table = $this->input->post('input_table');
+		$arr = explode ("->", $input_table);
+		$type = $this->datasource->getColumnType($arr[0], $arr[1], $datasource_id);
+		echo $type;
+	}
+	
 	function generateURI()
 	{
 		$input_class = $this->input->post('input_class');
@@ -388,7 +398,7 @@ class Mapping extends CI_Controller {
 		$ontology_id = $this->datasource->getOntology($datasource_id); 
 		$basic_uri = $this->datasource->getBasicUri($datasource_id); 
 		
-		echo $this->mapping->generateURI($input_class, $input_table, $basic_uri, $ontology_id); 
+		echo $this->mapping->generateURI($datasource_id, $input_class, $input_table, $basic_uri, $ontology_id); 
 	}
 		
 	function generateObjectpropertyURI()

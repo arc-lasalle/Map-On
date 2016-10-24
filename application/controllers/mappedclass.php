@@ -15,7 +15,12 @@ class Mappedclass extends CI_Controller {
 		$this->load->model("Mapping_model", "mapping");
 		$this->load->model("Mappedobjectproperty_model", "mappedobjectproperty");
 		$this->load->model("Mappeddataproperty_model", "mappeddataproperty");
-		$this->load->model("Log_model", "log");
+		//$this->load->model("Log_model", "mapon_log");
+
+		if ( !$this->ion_auth->logged_in() ){
+			redirect('auth/login', 'refresh');
+		}
+		
 
 	}
 		
@@ -26,6 +31,8 @@ class Mappedclass extends CI_Controller {
 		
 	public function view($datasource_id, $mappingspace_id, $mappedclass_id)
 	{
+		$this->maponrouting->set( $datasource_id, $mappingspace_id, $mappedclass_id );
+
 		$data["mappedclass_id"] = $mappedclass_id;
 		$data["mappingspace_id"] = $mappingspace_id;
 		$data["datasource_id"] = $datasource_id;
@@ -42,16 +49,22 @@ class Mappedclass extends CI_Controller {
 	
 	public function createnew($datasource_id, $mappingspace_id, $mappedclass_id = 0)
 	{	
-		if (!$this->ion_auth->logged_in()){
-			redirect('auth/login', 'refresh');
-		}
 		
-		$data["datasource_id"] = $datasource_id;
-		$data["mappingspace_id"] = $mappingspace_id;
-		$data["mappedclass_id"] = $mappedclass_id;
+		$this->maponrouting->set( $datasource_id, $mappingspace_id, $mappedclass_id );
+		$data["routes"] = $this->maponrouting->get();
 
-		$data["graph"] = $this->graph($datasource_id, $mappedclass_id, true);
-		
+
+		//$data["datasource_id"] = $datasource_id;
+		//$data["mappingspace_id"] = $mappingspace_id;
+		//$data["mappedclass_id"] = $mappedclass_id;
+
+		//$data["graph"] = $this->graph($datasource_id, $mappedclass_id, true);
+
+		$data2["mapping_graph"] = $this->_getGraphData( $datasource_id, $mappedclass_id );
+		$data["graph"] = $this->load->view('mappedclass/graph', $data2, true);
+
+
+
 		//For the bread crumb
 		$datasource = $this->datasource->getDatasource($datasource_id);
 		$mapspace = $this->mappingspace->getMappingspace($mappingspace_id);
@@ -59,7 +72,8 @@ class Mappedclass extends CI_Controller {
 		$head["breadcrumb"][] = array("name" => "Data source", "link" => "datasource");
 		$head["breadcrumb"][] = array("name" => $datasource[0]->name, "link" => "datasource/view/".$datasource_id);
 		$head["breadcrumb"][] = array("name" => $mapspace[0]->name, "link" => "mappingspace/graph/".$datasource_id."/".$mappingspace_id);
-
+		$data['db_type'] = $datasource[0]->type;
+		
 		$ontology_id = $this->datasource->getOntology($datasource_id);
 
 		if($mappedclass_id == 0) {
@@ -79,8 +93,10 @@ class Mappedclass extends CI_Controller {
 			$data["class"] = $this->prefix->getQName($data["class"], $ontology_id);
 
 			$head["breadcrumb"][] = array("name" => "Edit mapping", "link" => "mappedclass/createnew/".$datasource_id."/".$mappingspace_id."/".$mappedclass_id);
-			
-			$head["logs"] = $this->log->get("mappedclass", $mappedclass_id, 15);
+
+			//$head["logs"] = $this->mapon_log->get("mappedclass", $mappedclass_id, 15);
+
+			$head["logs"] = $this->maponlog->get( 15 );
 		}
 
 		$data['ontology_layout'] = $this->ontology->getOntologyLayout( $datasource_id );
@@ -91,7 +107,8 @@ class Mappedclass extends CI_Controller {
 		$this->load->view('mappedclass/createnew', $data);
 		//$this->load->view('footer_s');
 	}
-	
+
+
 	
 	public function createnew_post()
 	{
@@ -119,11 +136,15 @@ class Mappedclass extends CI_Controller {
 			///Creating a new one
 			$user_id = 1;
 			
-			$this->log->write("Mapping created: <strong>".$this->input->post('input_class')."</strong>", "new", "mappingspace", $mappingspace_id);
+			//$this->mapon_log->write("Mapping created: <strong>".$this->input->post('input_class')."</strong>", "new", "mappingspace", $mappingspace_id);
 			
 			$mappedclassid = $this->mappedclass->add($class, $sql, $uri, $user_id, $mappingspace_id, $mappedtablecolumn);
 			
-			$this->log->write("Mapping created: <strong>".$this->input->post('input_class')."</strong>", "new", "mappedclass", $mappedclassid);
+			//$this->mapon_log->write("Mapping created: <strong>".$this->input->post('input_class')."</strong>", "new", "mappedclass", $mappedclassid);
+
+			$this->maponlog->add( "new", "Mapping created: <strong>".$this->input->post('input_class')."</strong>" );
+
+			
 			
 		} else {
 			//editing an old one
@@ -141,8 +162,9 @@ class Mappedclass extends CI_Controller {
 			if($row[0]->uri !== $this->input->post('input_uri'))
 				$actionlog = $actionlog.". URI: <strong>".$this->input->post('input_uri')."</strong>";
 				
-			$this->log->write("Mapping modified: <strong>".$from."</strong>".$actionlog, "edit", "mappingspace", $mappingspace_id);
-			$this->log->write("Mapping modified: <strong>".$from."</strong>".$actionlog, "edit", "mappedclass", $mappedclass_id);
+			//$this->mapon_log->write("Mapping modified: <strong>".$from."</strong>".$actionlog, "edit", "mappingspace", $mappingspace_id);
+			//$this->mapon_log->write("Mapping modified: <strong>".$from."</strong>".$actionlog, "edit", "mappedclass", $mappedclass_id);
+			$this->maponlog->add( "edit", "Mapping modified: <strong>".$from."</strong>".$actionlog );
 			
 			$mappedclassid = $this->mappedclass->update($mappedclass_id, $class, $sql, $uri, $mappedtablecolumn);
 		
@@ -167,6 +189,7 @@ class Mappedclass extends CI_Controller {
 		redirect('/mappingspace/graph/'.$datasource_id.'/'.$mappingspace_id);
 	}
 	
+    /*
 	public function graph($datasource_id, $mappedclass_id, $toText = false)
 	{
 		$datalist = $this->datasource->getDatasource($datasource_id);
@@ -176,16 +199,16 @@ class Mappedclass extends CI_Controller {
 		$data["datasource_id"] = $datasource_id;	
 		$data["mappedclass_id"] = $mappedclass_id;	
 		
-		$data["tables"] = $this->datasource->getTables($datasource_id);
+		//$data["tables"] = $this->datasource->getTables( $datasource_id );
 
 		$mappedclass = $this->mappedclass->getMappedclass($mappedclass_id);
 		
 		$data["class"] = (count($mappedclass) > 0) ? $this->prefix->getQName($mappedclass[0]->class, $data["datasource"]->ontology_id): "";
 		$data["table"] = (count($mappedclass) > 0) ? $mappedclass[0]->mappedtablecolumn: "";
 
-		foreach($data["tables"] as $row) {
-			$data["columns"][$row->id] = $this->datasource->getColumns($row->id);
-		}
+		//foreach($data["tables"] as $row) {
+		//	$data["columns"][$row->id] = $this->datasource->getColumns($row->id);
+		//}
 		
 		$tablesonList = $this->mappedclass->getTableson($mappedclass_id);
 		$data["tableson"] = array();
@@ -208,9 +231,30 @@ class Mappedclass extends CI_Controller {
 		} else {
 			return $this->load->view('mappedclass/graph', $data, true);
 		}
+	}*/
+
+	public function _getGraphData ( $datasource_id, $mappedclass_id ) {
+
+		// DATASOURCE - TABLES & COLUMNS
+
+		$data["tables"] = $this->datasource->getTableTree( $datasource_id );
+
+		$enabledTables = $this->mappedclass->getTableson( $mappedclass_id, true );
+
+        $enabled_tables = [];
+		foreach( $enabledTables as $row ) $enabled_tables[] = strtolower($row->tableid);
+
+		foreach( $data["tables"] as $table ) {
+			$table->enabled = in_array( strtolower( $table->name ), $enabled_tables);
+			//$table->enabled = false;
+		}
+
+
+		return $data;
 	}
-	
-	
+
+
+
 	public function edit($datasource_id, $mappingspace_id, $mappedclass_id)
 	{		
 		$data["mappedclass_id"] = $mappedclass_id;
@@ -232,6 +276,12 @@ class Mappedclass extends CI_Controller {
 		$this->load->view('mappedclass/edit', $data);
 		$this->load->view('footer');
 	}
+
+	public function move( $mappedclass_id, $new_mappingspace_id ) {
+		$this->mappedclass->move( $mappedclass_id, $new_mappingspace_id );
+
+		redirect($_SERVER['HTTP_REFERER']);
+	}
 	
 	
 	public function edit_post()
@@ -248,9 +298,10 @@ class Mappedclass extends CI_Controller {
 		
 		$row = $this->mappedclass->getMappedclass($mappedclass_id);
 
-		$this->log->write("mapping modified from ".$this->prefix->getQName($row[0]->class, $ontology_id)." to ".$class, "mappingspace", $mappingspace_id);
+		//$this->mapon_log->write("mapping modified from ".$this->prefix->getQName($row[0]->class, $ontology_id)." to ".$class, "mappingspace", $mappingspace_id);
 		
-		
+		$this->maponlog->add( "edit", "mapping modified from ".$this->prefix->getQName($row[0]->class, $ontology_id)." to ".$class );
+
 		$class = $this->prefix->getURI($class, $ontology_id);
 		
 		//Updating the mapped class
@@ -280,10 +331,12 @@ class Mappedclass extends CI_Controller {
 		
 		
 		$this->mappedclass->delete($mappedclass_id);
-		
-		$this->log->write("Mapping deleted: <strong>".$from."</strong>", "delete", "mappingspace", $mappingspace_id);
-		$this->log->write("Mapping deleted: <strong>".$from."</strong>", "delete", "mappedclass", $mappedclass_id);
 
+		//$this->mapon_log->write("Mapping deleted: <strong>".$from."</strong>", "delete", "mappingspace", $mappingspace_id);
+		//$this->mapon_log->write("Mapping deleted: <strong>".$from."</strong>", "delete", "mappedclass", $mappedclass_id);
+
+		$this->maponlog->add( "delete", "Mapping deleted: <strong>".$from."</strong>" );
+		
 		redirect('/mappingspace/graph/'.$datasource_id.'/'.$mappingspace_id);
 	}
 
@@ -368,7 +421,7 @@ class Mappedclass extends CI_Controller {
 			
 			$sql = $this->mapping->generateSQL($row[0]->mappedtablecolumn, $domain_id, $datasource_id);
 			
-			$uri = $this->mapping->generateURI($paths[$i], $row[0]->mappedtablecolumn, $basic_uri, $ontology_id); 
+			$uri = $this->mapping->generateURI($datasource_id, $paths[$i], $row[0]->mappedtablecolumn, $basic_uri, $ontology_id); 
 			
 			$target_id = $this->mappedclass->add($target, $sql, $uri, $user_id, $mappingspace_id, $row[0]->mappedtablecolumn);
 
@@ -376,7 +429,7 @@ class Mappedclass extends CI_Controller {
 			
 			$objectproperty = $this->prefix->getURI($paths[$i-1], $ontology_id);
 			
-			$uri = $this->mapping->generateURI($target, $row[0]->mappedtablecolumn, $basic_uri, $ontology_id); 
+			$uri = $this->mapping->generateURI($datasource_id, $target, $row[0]->mappedtablecolumn, $basic_uri, $ontology_id); 
 
 			
 			echo "uri: ".$uri."<br>";

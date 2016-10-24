@@ -23,7 +23,7 @@
 			<td><?php echo $row->name; ?></td>
 			<td><?php echo $row->file; ?> </td>
 			<td>
-				<a href="<?php echo base_url();?>upload/ontologies/<?php echo $ontology->id."_".$ontology->name; ?>/source/<?php echo $row->file;	 ?>">
+				<a href="<?php echo base_url();?>upload/<?php echo $this->team->dir()?>/ontologies/<?php echo $ontology->id."_".$ontology->name; ?>/source/<?php echo $row->file;	 ?>">
 					<i class="file outline icon" style="color: black;" title="View file"></i>
 				</a>
 

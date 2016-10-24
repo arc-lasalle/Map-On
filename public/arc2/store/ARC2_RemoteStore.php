@@ -3,7 +3,7 @@
  * ARC2 Remote RDF Store
  *
  * @author Benjamin Nowack <bnowack@semsol.com>
- * @license http://arc.semsol.org/license
+ * @license W3C Software License and GPL
  * @package ARC2
  * @version 2010-11-16
 */
@@ -185,7 +185,9 @@ class ARC2_RemoteStore extends ARC2_Class {
     else {
       $r = preg_replace("/^(.*[\/\#])([^\/\#]+)$/", '\\2', str_replace('#self', '', $res));
       $r = str_replace('_', ' ', $r);
-      $r = preg_replace('/([a-z])([A-Z])/e', '"\\1 " . strtolower("\\2")', $r);
+      $r = preg_replace_callback('/([a-z])([A-Z])/', function($matches) {
+        return $matches[1] . ' ' . strtolower($matches[2]);
+      }, $r);
     }
     $this->resource_labels[$res] = $r;
     return $r;

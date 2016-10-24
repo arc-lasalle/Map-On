@@ -13,51 +13,56 @@ class Datasource extends CI_Controller {
 		$this->load->model("Prefix_model", "prefix");
 		$this->load->model("Mappedobjectproperty_model", "mappedobjectproperty");
 
+		if ( !$this->ion_auth->logged_in() ){
+			redirect( 'auth/login', 'refresh' );
+		}
+
 	}
-		
+
 	public function index()
 	{
-		if (!$this->ion_auth->logged_in()){
-			redirect('auth/login', 'refresh');
-		}
-		
+
 //		$vars['datasources'] = $this->datasource->getDatasources();
-		
-		$vars['datasources'] = $this->datasource->getDatasourcesAndOntologies();
+		if ( $this->team->connected() ) {
+			$vars['datasources'] = $this->datasource->getDatasourcesAndOntologies();
+		} else {
+			$vars['datasources'] = [];
+		}
+
 
 		$vars["createnew"] = $this->createnew(true);
-		
+
 		$head["breadcrumb"][] = array("name" => "Data source", "link" => "datasource");
-		
+
 		$this->load->view('header_s', $head);
 		$this->load->view('datasource/list', $vars);
 		$this->load->view('footer_s');
-	}	
-			
+	}
+
 	public function view($datasource_id)
 	{
-		if (!$this->ion_auth->logged_in()){
-			redirect('auth/login', 'refresh');
-		}
-		
+
+		$this->maponrouting->set( $datasource_id );
+		$data["routes"] = $this->maponrouting->get();
+
 		$row = $this->datasource->getDatasource($datasource_id);
 
-		$data["datasource_id"] = $datasource_id;	
+		$data["datasource_id"] = $datasource_id;
 
-		$data["name"] = (count($row) > 0) ? $row[0]->name: "";	
-		$data["sqlfile"] = (count($row) > 0) ? $row[0]->sqlfile: "";	
-		$data["stringconnection"] = (count($row) > 0) ? $row[0]->stringconnection: "";	
-		$data["xmlfile"] = (count($row) > 0) ? $row[0]->xmlfile: "";	
-		$data["basicuri"] = (count($row) > 0) ? $row[0]->basicuri: "";	
+		$data["name"] = (count($row) > 0) ? $row[0]->name: "";
+		$data["sqlfile"] = (count($row) > 0) ? $row[0]->sqlfile: "";
+		$data["stringconnection"] = (count($row) > 0) ? $row[0]->stringconnection: "";
+		$data["xmlfile"] = (count($row) > 0) ? $row[0]->xmlfile: "";
+		$data["basicuri"] = (count($row) > 0) ? $row[0]->basicuri: "";
 		$data["ontologyId"] = $row[0]->ontology_id;
 		$data["ontologyName"] = $this->ontology->getOntology($row[0]->ontology_id)->name;
-		$data["date"] = (count($row) > 0) ? $row[0]->date: "";	
+		$data["date"] = (count($row) > 0) ? $row[0]->date: "";
 
 		$data["mspaces"] = $this->mappingspace->getMappingspaces($datasource_id);
-		
+
 		$ontology_id = $this->datasource->getOntology($datasource_id);
 
-				
+
 		///Getting mappings and tables used in the mappings spaces
 		foreach($data["mspaces"] as $row) {
 			$list = $this->mappedclass->getMappedclasses($row->id);
@@ -65,47 +70,51 @@ class Datasource extends CI_Controller {
 			$data["tables"][$row->id] = "";
 
 			foreach($list as $rowmp) {
-				if (false === strpos($data["mappings"][$row->id], $this->prefix->getQName($rowmp->class, $ontology_id))) 
+				if (false === strpos($data["mappings"][$row->id], $this->prefix->getQName($rowmp->class, $ontology_id)))
 					$data["mappings"][$row->id] = $data["mappings"][$row->id]. "<strong>".$this->prefix->getQName($rowmp->class, $ontology_id)."</strong>, ";
-				
-				if (false === strpos($data["tables"][$row->id], $rowmp->mappedtablecolumn)) 
+
+				if (false === strpos($data["tables"][$row->id], $rowmp->mappedtablecolumn))
 					$data["tables"][$row->id] = $data["tables"][$row->id]. "<strong>".$rowmp->mappedtablecolumn."</strong>, ";
 
 			}
 		}
-		
-		$data["graph"] = $this->graph($datasource_id, true);
-		
-		
+
+		$graphData["routes"] = $this->maponrouting->get();
+		$graphData["mapping_graph"] = $this->getGraphData( $datasource_id );
+
+		$data["graph"] = $this->load->view('datasource/graph', $graphData, true);
+
+
+
 		$head["breadcrumb"][] = array("name" => "Data source", "link" => "datasource");
 		$head["breadcrumb"][] = array("name" => $data["name"], "link" => "datasource/view/".$datasource_id);
-		
+
 		$this->load->view('header_s', $head);
 		$this->load->view('datasource/view', $data);
 		$this->load->view('footer_s');
 	}
-	
-	public function graph($datasource_id, $toText = false)
-	{
-		$datalist = $this->datasource->getDatasource($datasource_id);
-		$data["datasource"] = $datalist[0];
-		$data["ontologyName"] = $this->ontology->getOntology($data["datasource"]->ontology_id)->name;
 
-		$data["datasource_id"] = $datasource_id;	
-		
+	public function getGraphData ( $datasource_id ) {
+		$data["datasource_id"] = $datasource_id;
+
 		$data["tables"] = $this->datasource->getTables($datasource_id);
-		
-		foreach($data["tables"] as $row) {
-			$data["columns"][$row->id] = $this->datasource->getColumns($row->id);
+
+		foreach( $data["tables"] as $i => $table ) {
+
+			$table->columns = $this->datasource->getColumns( $table->id );
+
 		}
-		
-		if(!$toText) {
-			$this->load->view('header_s');
-			$this->load->view('datasource/graph', $data);
-			$this->load->view('footer_s');
-		} else {
-			return $this->load->view('datasource/graph', $data, true);
-		}
+
+		return $data;
+	}
+
+	public function graph( $datasource_id )
+	{
+		$graphData["mapping_graph"] = $this->getGraphData($datasource_id);
+
+		$this->load->view('header_s');
+		$this->load->view('datasource/graph', $graphData);
+		$this->load->view('footer_s');
 	}
 	
 	public function createnew($toText = false)
@@ -113,9 +122,11 @@ class Datasource extends CI_Controller {
 		if (!$this->ion_auth->logged_in()){
 			redirect('auth/login', 'refresh');
 		}
-		
-		$data['ontologies'] = $this->ontology->getOntologies();
-		
+		if ( $this->team->connected() ) {
+			$data['ontologies'] = $this->ontology->getOntologies();
+		} else {
+			$data['ontologies'] = [];
+		}
 		if(!$toText) {
 			$this->load->view('header');
 			$this->load->view('datasource/createnew', $data);
@@ -167,7 +178,7 @@ class Datasource extends CI_Controller {
 
 				$datasource_id = $this->datasource->add($name, $file_name, "", "", $basicuri, $user_id, $ontology_id);
 
-				$datasource_path = "upload/datasources/" . $datasource_id . "_" . $name . "/source/";
+				$datasource_path = "upload/".$this->team->dir()."/datasources/" . $datasource_id . "_" . $name . "/source/";
 				if ( !is_dir($datasource_path) ) mkdir($datasource_path, 0777, true);
 				move_uploaded_file($_FILES['input_attachment']['tmp_name'], $datasource_path.$file_name );
 
@@ -182,7 +193,7 @@ class Datasource extends CI_Controller {
 
 				$datasource_id = $this->datasource->add($name, $file_name, "", "", $basicuri, $user_id, $ontology_id);
 
-				$datasource_path = "upload/datasources/" . $datasource_id . "_" . $name . "/source/";
+				$datasource_path = "upload/".$this->team->dir()."/datasources/" . $datasource_id . "_" . $name . "/source/";
 				if ( !is_dir($datasource_path) ) mkdir($datasource_path, 0777, true);
 				move_uploaded_file($_FILES['input_attachment']['tmp_name'], $datasource_path.$file_name );
 
@@ -219,11 +230,12 @@ class Datasource extends CI_Controller {
 		
 		$this->datasource->update($datasource_id, $name, $basicuri, $ontology_id);
 		
+		redirect($_SERVER['HTTP_REFERER']);
 		
 //		$this->index();
 	}
 	
-	public function delete($datasource_id)
+	public function delete($datasource_id, $redirect)
 	{		
 		///////////////////////////////////////////////////////////////		
 		// If it is a guest user then he/she is automatically redirected without modifying the mapping
@@ -231,37 +243,47 @@ class Datasource extends CI_Controller {
 			$this->index();
 		}
 
-		$datasource_name = $this->datasource->getDatasource($datasource_id)[0]->name;
-		$datasource_dir = getcwd() . "/upload/datasources/" . $datasource_id . "_" . $datasource_name;
+		$datasource_name = $this->datasource->getDatasource($datasource_id);
 
-		if ( is_dir($datasource_dir) ){
-			if (PHP_OS === 'WINNT') {
-				exec('rd /s /q "' . $datasource_dir . '"');
-			} else {
-				exec('rm -rf "' . $datasource_dir . '"');
+		if ( !empty($datasource_name[0]) ) {
+
+			$datasource_name = $datasource_name[0]->name;
+			$datasource_dir = getcwd() . "/upload/".$this->team->dir()."/datasources/" . $datasource_id . "_" . $datasource_name;
+
+			if ( is_dir($datasource_dir) ){
+				if (PHP_OS === 'WINNT') {
+					exec('rd /s /q "' . $datasource_dir . '"');
+				} else {
+					exec('rm -rf "' . $datasource_dir . '"');
+				}
 			}
+
+			$this->datasource->delete($datasource_id);
+
 		}
 
-		$this->datasource->delete($datasource_id);
-
-		$this->index();
+		if ( isset($redirect) && $redirect === true ) {
+			$this->index();
+		}
 	}		
 	
 	
 	public function storepositions()
-	{		
+	{
+		if ( $this->ion_auth->in_group('guest') ) return;
+
 		$datasource_id = $this->input->post('datasourceid');
 		$nodeid = $this->input->post('nodeid');
 		$layoutX = $this->input->post('layoutX');
 		$layoutY = $this->input->post('layoutY');
-		
-		///////////////////////////////////////////////////////////////		
-		// If it is a guest user then he/she is automatically redirected without modifying the mapping
-		if (!$this->ion_auth->in_group('guest')){
-				
+		$unpin = $this->input->post('unpin');
+
+		if ( $unpin !== null ) {
+			$this->datasource->deletePosition($datasource_id, $nodeid, 0, 0);
+		} else {
 			$this->datasource->updatePosition($datasource_id, $nodeid, $layoutX, $layoutY);
 		}
-		//echo $datasource_id." ".$nodeid." ".$layoutX." ".$layoutY." ";
+
 	}
 
 
@@ -307,7 +329,27 @@ class Datasource extends CI_Controller {
 		$schema = simplexml_load_string( $schema_encoded );
 		$schema = json_decode(json_encode((array)$schema), TRUE); //Object to array
 
-		foreach ( $schema['tables']['model.Table'] as $table ) {
+		if ( isset($schema['type']) ) {
+			$this->datasource->setDbType( $datasource_id, $schema['type'] );
+		}
+
+		if ( !isset($schema['tables']) ) {
+			//Invalid file.
+			$this->session->set_flashdata('error_message', [false, "Invalid file, must be created with 'Schema Creator' tool.", "Download: <a href='" . $this->config->item('schema_creator_tool_url') . "'>Schema Creator tool.</a>" ]);
+			$this->delete( $datasource_id, false );
+			redirect("datasource");
+		}
+
+		$tables = $schema['tables']['model.Table'];
+		if ( isset( $tables['name'] )) $tables = $schema['tables'];
+
+		if ( !is_array($tables) ) {
+			$this->session->set_flashdata('error_message', [false, "Malformed file, there are no tables." ]);
+			$this->delete( $datasource_id, false );
+			redirect("datasource");
+		}
+
+		foreach ( $tables as $table ) {
 
 			$idTable = $this->datasource->addTable( $datasource_id, $table['name'] );
 

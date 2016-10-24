@@ -688,7 +688,7 @@
 		<?php echo form_close(); ?>
 	</div>	
 	<div class="ui segment ">
-		<div id="graphDiv" style="background-image: URL(<?php echo base_url()?>public/img/lightbg.png); height:600px "></div>
+		<div id="graphDiv"  class="avoid_right_click unselectable" style="background-image: URL(<?php echo base_url()?>public/img/lightbg.png); height:600px "></div>
 	</div>
 
 		

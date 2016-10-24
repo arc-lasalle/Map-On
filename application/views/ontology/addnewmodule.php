@@ -57,9 +57,6 @@
 
 <script>
 
-$('.ui.dropdown')
-  .dropdown()
-;
 
 
 $('#input_attachment').change(function() {

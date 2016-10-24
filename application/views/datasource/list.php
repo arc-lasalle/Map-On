@@ -1,21 +1,22 @@
 <div class="ui green segment">
 <table class="ui selectable basic small table">
-  <thead>
-    <tr>
-	<th >Name</th>
-	<th >SQL file</th>
-	<th >URI</th>
-	<th >Ontology</th>
-	<th >Date</th>
-	<th ></th>
-  </tr></thead>
-  <tbody>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>URI</th>
+            <th>Ontology</th>
+            <th>Schema file</th>
+            <th>Date</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
     <?php foreach($datasources as $row): ?>
 		<tr>
 			<td><a href="<?php echo base_url();?>index.php/datasource/view/<?php echo $row->id; ?>"><?php echo $row->name; ?></a>	</td>
-			<td><?php echo $row->sqlfile; ?> </td>
-			<td><?php echo $row->basicuri; ?> </td>
-			<td><?php echo $row->ontologyName; ?> </td>
+            <td><?php echo $row->basicuri; ?> </td>
+            <td><?php echo $row->ontologyName; ?> </td>
+            <td><?php echo $row->sqlfile . " (" . $row->type . ")"; ?> </td>
 			<td><?php echo $row->date; ?> </td>
 			<td>
 				<a href="#" onclick="openEditDialog(<?php echo $row->id; ?>, '<?php echo $row->name; ?>','<?php echo $row->sqlfile; ?>','<?php echo $row->basicuri; ?>',<?php echo $row->ontology_id; ?>,'<?php echo $row->ontologyName; ?>');">
@@ -29,10 +30,18 @@
 	<?php endforeach; ?>
   </tbody>
   <tfoot>
-    <tr><th colspan="7"><br/>
-      <div class="ui tiny button" onMouseUp="$('.ui.new.modal').modal('show');">Create new data source</div>
-    </th>
-  </tr></tfoot>
+    <tr>
+		<th colspan="7"><br/>
+			<?php
+				if ( $this->team->connected() ) {
+					echo '<div class="ui tiny button" onMouseUp="$(\'.ui.new.modal\').modal(\'show\');">Create new data source</div>';
+			 	} else {
+					echo 'Team not selected.';
+				}
+			?>
+    	</th>
+  	</tr>
+  </tfoot>
 </table>
 </div>
 
@@ -70,9 +79,9 @@
 			<div class="field">
 				<div class="ui action input">
 					<input type="text" id="_attachmentName" readonly>
-					<label for="input_attachment" class="ui icon button btn-file" style="max-width: 35px;">
+					<label for="input_attachment" class="ui icon button btn-file">
 						 Select file&nbsp;
-						 <input type="file" id="input_attachment" name="input_attachment" style="display: none" onchange="showFileName();">
+						 <input type="file" accept=".xml,.sql" id="input_attachment" name="input_attachment" style="display: none" onchange="showFileName();">
 					</label>
 				</div>
 			</div>
@@ -87,7 +96,7 @@
 
 		<div class="field">
 			<label>Target ontology</label>
-			<div class="ui selection dropdown select-language">
+			<div id="target_dwopdown_1" class="ui selection dropdown select-language">
 				<input name="input_ontology" id="input_ontology" type="hidden" value="fr-FR">
 				<div class="text">Select ontology...</div>
 				<i class="dropdown icon"></i>
@@ -106,7 +115,7 @@
 	</div>
 
 	<div class="actions">
-		<input id="download_schema_parser" value="Download schema creator tool" class="ui tiny left floated button" style="display: none; width: 180px;" onclick="window.open('<?php echo base_url(); ?>/public/tools/MaponSql.zip')" />
+		<input id="download_schema_parser" value="Download schema creator tool" class="ui tiny left floated button" style="display: none; width: 180px;" onclick="window.open('<?php echo $this->config->item('schema_creator_tool_url'); ?>')" />
 		<input type="submit" value="Create" class="ui tiny button" />
 		<div class="ui tiny deny button">Cancel</div>
 	</div>
@@ -143,7 +152,7 @@
 
 		<div class="field">
 			<label>Target ontology</label>
-			<div class="ui selection dropdown edit-ontology">
+			<div id="target_dwopdown_2" class="ui selection dropdown edit-ontology">
 				<input name="input_edit_ontology" id="input_edit_ontology" type="hidden" value="fr-FR">
 				<div class="text" id="input_edit_ontology_name">Select ontology...</div>
 				<i class="dropdown icon"></i>
@@ -172,9 +181,8 @@
 
 
 <script>
-	$('.ui.dropdown')
-	  .dropdown()
-	;
+	$('#target_dwopdown_1').dropdown();
+	$('#target_dwopdown_2').dropdown();
 
 	function openEditDialog(id, name, sqlfile, basicuri, ontologyID, ontologyName) {
 
@@ -211,5 +219,7 @@
 			$('#download_schema_parser').css('display', 'block');
 		}
 	}
+
+    uploadType(1);
 
 </script>
