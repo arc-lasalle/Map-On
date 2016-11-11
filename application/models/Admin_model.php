@@ -103,7 +103,7 @@ class Admin_model extends CI_Model
 
         echo 'Connected successfully <br>';
 
-        $sql_create = "CREATE DATABASE " . $database_name;
+        $sql_create = "CREATE DATABASE " . $database_name . " CHARACTER SET utf8 COLLATE utf8_general_ci;";
         if (mysqli_query($conn, $sql_create) === TRUE) {
             echo "Database created successfully <br>";
         } else {

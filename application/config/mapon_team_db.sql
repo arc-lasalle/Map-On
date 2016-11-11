@@ -14,10 +14,10 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+/*!40101 SET NAMES utf8 */;
 
 --
--- Base de datos: `mapon_test2`
+-- Base de datos: `mapon_teamName`
 --
 
 -- --------------------------------------------------------
@@ -29,7 +29,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `configuration` (
   `name` varchar(256) NOT NULL,
   `value` varchar(256) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `configuration`
@@ -55,7 +55,7 @@ CREATE TABLE `datasource` (
   `date` date NOT NULL,
   `user_id` int(11) NOT NULL,
   `ontology_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -68,7 +68,7 @@ CREATE TABLE `datasource_layout` (
   `layoutX` int(11) NOT NULL,
   `layoutY` int(11) NOT NULL,
   `datasource_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -82,8 +82,8 @@ CREATE TABLE `log` (
   `user_name` varchar(256) NOT NULL,
   `log_message` text NOT NULL,
   `action` varchar(256) NOT NULL,
-  `date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -100,7 +100,7 @@ CREATE TABLE `mappedclass` (
   `date` date NOT NULL,
   `user_id` int(11) NOT NULL,
   `mappingspace_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -114,7 +114,7 @@ CREATE TABLE `mappedclass_layout` (
   `layoutX` int(11) NOT NULL,
   `layoutY` int(11) NOT NULL,
   `mappedclass_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -126,7 +126,7 @@ CREATE TABLE `mappedclass_tableson` (
   `id` int(11) NOT NULL,
   `tableid` varchar(256) NOT NULL,
   `mappedclass_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -140,7 +140,7 @@ CREATE TABLE `mappeddataproperty` (
   `value` varchar(256) COLLATE utf8_bin NOT NULL,
   `type` varchar(256) COLLATE utf8_bin NOT NULL,
   `mappedclass_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -154,7 +154,7 @@ CREATE TABLE `mappedobjectproperty` (
   `uri` text COLLATE utf8_bin NOT NULL,
   `mappedclassdomain_id` int(11) NOT NULL,
   `mappedclassrange_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -168,7 +168,7 @@ CREATE TABLE `mappingspace` (
   `date` date NOT NULL,
   `user_id` int(11) NOT NULL,
   `datasource_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -182,7 +182,7 @@ CREATE TABLE `mappingspace_layout` (
   `layoutX` int(11) NOT NULL,
   `layoutY` int(11) NOT NULL,
   `mappingspace_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -195,7 +195,7 @@ CREATE TABLE `ontology` (
   `name` varchar(256) COLLATE utf8_bin NOT NULL,
   `date` date NOT NULL,
   `user_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -209,7 +209,7 @@ CREATE TABLE `ontology_layout` (
   `layoutX` int(11) NOT NULL,
   `layoutY` int(11) NOT NULL,
   `datasource_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -223,7 +223,7 @@ CREATE TABLE `ontology_modules` (
   `file` text COLLATE utf8_bin NOT NULL,
   `url` text COLLATE utf8_bin NOT NULL,
   `ontology_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -236,7 +236,7 @@ CREATE TABLE `prefix` (
   `prefix` varchar(256) NOT NULL,
   `iri` varchar(256) NOT NULL,
   `ontology_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -250,7 +250,7 @@ CREATE TABLE `r2rmlparts` (
   `datasource_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `date` date NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -267,7 +267,7 @@ CREATE TABLE `sourcecolumn` (
   `foreignkey` varchar(128) COLLATE utf8_bin NOT NULL,
   `foreigntable` varchar(128) COLLATE utf8_bin NOT NULL,
   `sourcetable_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -282,7 +282,7 @@ CREATE TABLE `sourcetable` (
   `datasource_id` int(11) NOT NULL,
   `layoutX` int(11) NOT NULL,
   `layoutY` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 --
 -- Índices para tablas volcadas

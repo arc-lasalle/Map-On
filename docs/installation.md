@@ -31,4 +31,28 @@ Modify database credentials from 'application/config/database.php'
 > $db['default']['username'] = 'database_username'; <br>
 > $db['default']['password'] = 'database_password';
 
+### Permissions
+Apache user must have write permissions on 'upload' and 'download' directories.
+
+
+----------
+<br>
+Usage
+-------------
+
+### Default user
+> Login: admin@admin.com <br>
+> Password: adminadmin
+
+### Basic steps
+1. Login to platform.
+2. Go to 'Admin > Create new team' amd create a new team.
+3. Go to 'Admin > List users > Admin > Edit user > Teams' and select the previously created team.
+4. Go to the top right corner of screen and select the team.
+5. Upload the ontology, upload the datasource and create the mappings.
+	1. Go to 'Ontologies' tab and upload the ontology.
+	2. Go to 'Data sources' tab and upload the datasource.
+	3. Go to 'Data sources' tab, select your datasource and create the mappings.
+	4. Go to 'Data sources' tab, select your datasource and click on 'Export to R2RML' to obtain the created mappings.
+
 Copyright (C) 2016 ARC Engineering and Architecture La Salle, Ramon Llull University.
