@@ -235,7 +235,7 @@ class Datasource extends CI_Controller {
 //		$this->index();
 	}
 	
-	public function delete($datasource_id, $redirect)
+	public function delete($datasource_id, $redirect = true)
 	{		
 		///////////////////////////////////////////////////////////////		
 		// If it is a guest user then he/she is automatically redirected without modifying the mapping

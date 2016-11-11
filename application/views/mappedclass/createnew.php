@@ -69,6 +69,13 @@
 							<div class="field">
 								<label>SQL query</label>
 								<div class="ui input" data-content="Write the SQL query for the mapping. When a column of the data source is selected the SQL query is automatically set" >
+									<?php
+									$sql = str_replace("SELECT ", "SELECT\r\n", $sql);
+									$sql = str_replace(" FROM ", "\r\nFROM\r\n", $sql);
+									$sql = str_replace(" WHERE ", "\r\nWHERE\r\n", $sql);
+									$sql = str_replace(" AND ", "\r\nAND\r\n", $sql);
+									?>
+
 									<textarea type="text" id="input_sql" rows="2"  name="input_sql" ><?php echo $routes['mapped_class_id'] == 0 ? "SQL query...": $sql ; ?></textarea>
 								</div>
 

@@ -127,7 +127,10 @@ class Mappedclass extends CI_Controller {
 		if ($this->ion_auth->in_group('guest')){
 			redirect('/mappingspace/graph/'.$datasource_id.'/'.$mappingspace_id);
 		}
-		
+
+		// Delete '\r' '\n' and double spaces.
+		$sql = preg_replace('!\s+!', ' ', $sql);
+
 		
 		$ontology_id = $this->datasource->getOntology($datasource_id);
 		$class = $this->prefix->getURI($class, $ontology_id);
