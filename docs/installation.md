@@ -7,6 +7,8 @@ Map-On is a graphical environment for ontology mapping which helps different kin
 Installation
 -------------
 ### System configuration
+Map-On was developed under PHP7, older versions may give some compatibility issues.
+
 Make sure 'mysql' command are available on terminal.
 > $ mysql <br>
 If not available, add mysql path to your environment PATH variable.

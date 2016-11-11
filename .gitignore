@@ -3,6 +3,8 @@
 **/webvowl/deploy/*
 **/public/webvowl_deploy/*
 **/node_modules/*
+upload/
+download/
 vendor/
 application/config/config.php
 application/config/database.php
