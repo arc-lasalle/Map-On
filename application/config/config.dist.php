@@ -15,7 +15,7 @@
 |
 */
 
-$config['base_url'] = 'http://localhost/mapon/';
+$config['base_url'] = 'http://localhost/Map-On/';
 
 
 $config['schema_creator_tool_url'] = $config['base_url'] . '/public/tools/MapSchemaV0.2.zip';

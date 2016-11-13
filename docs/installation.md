@@ -36,6 +36,9 @@ Modify database credentials from 'application/config/database.php'
 ### Permissions
 Apache user must have write permissions on 'upload' and 'download' directories.
 
+### Optional configurations
+This project **runs under default apache installation**, for optional configurations (apache2 VirtualHosts or Nginx) see [apache/nginx configuration](./apache_nginx.md)
+
 
 ----------
 <br>
