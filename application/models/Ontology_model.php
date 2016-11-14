@@ -267,7 +267,7 @@ class Ontology_model extends CI_Model
         $msg .= '<li>DOMAIN: Triples: ' . $domain_triples . '</li>';
         $msg .= '</ul>';
 
-        $this->maponrouting->showMessage( true, "Success", $msg );
+        $this->maponrouting->showMessage( true, "Success" );
 		
 		$newtriples = array();
 		

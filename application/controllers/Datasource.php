@@ -298,7 +298,7 @@ class Datasource extends CI_Controller {
 
 		if (!$this->ion_auth->in_group('guest')) {
 			$insert = ($save === "true");
-			$this->datasource->setDbgraphLayout($datasource_id, $tableid, $insert, $layoutX, $layoutY);
+			$this->datasource->setDatasourceLayout($datasource_id, $tableid, $insert, $layoutX, $layoutY);
 		}
 	}
 

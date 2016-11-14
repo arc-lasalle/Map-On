@@ -211,7 +211,7 @@ editionArea.prototype.loadDbgraph = function() {
 
     dbGraph_initialize( function( graph ){
         var table_cols, table, col, fk_origin, fk_dest;
-        var tables = php_vars.dbgraph_layout;
+        var tables = php_vars.tables;
         //var cols = JSON.parse(php_vars.db_columns);
         var layout = php_vars.dbgraph_layout;
 
@@ -319,19 +319,31 @@ $('.ea_dataproperty_search_box').keyup(function(){ ea.showSearchBox("data_proper
 $('.ea_table_search_box, .ea_table_search_box + i').click( function() { ea.showSearchBox("table", 0); });
 $('.ea_table_search_box').keyup(function(){ ea.showSearchBox("table", 500); });
 
-$('#horizontal_collapse').click( function() {
-    var visible = $('#left_grid').is(":visible");
-    if ( visible ) {
+function horizontal_collapse( collapse ) {
+    if ( typeof collapse === 'undefined' ) {
+        collapse = $('#left_grid').is(":visible"); //Toggle
+    }
+
+    if ( collapse ) {
         $('#left_grid').hide();
         $('#horizontal_collapse').removeClass('left').addClass('right');
         $('#right_grid').removeClass('eleven wide').addClass('sixteen wide');
+        sessionStorage.setItem("collapse_"+document.URL, true);
     } else {
         $('#left_grid').show();
         $('#horizontal_collapse').removeClass('right').addClass('left');
         $('#right_grid').removeClass('sixteen wide').addClass('eleven wide');
+        sessionStorage.removeItem("collapse_"+document.URL);
     }
+}
 
+$('#horizontal_collapse').click( function() {
+    horizontal_collapse();
 });
+
+if ( sessionStorage.getItem("collapse_"+document.URL) == "true" ) {
+    horizontal_collapse(true);
+}
 
 
 editionArea.prototype.showSearchBox = function( type, timeout ) {

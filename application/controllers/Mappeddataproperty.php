@@ -104,6 +104,7 @@ class Mappeddataproperty extends CI_Controller {
 
 		$data['ontology_layout'] = $this->ontology->getOntologyLayout( $datasource_id );
 		$data['dbgraph_layout'] = $this->datasource->getDatasourceLayout( $datasource_id );
+		$data["tables"] = $this->datasource->getTableTree( $datasource_id );
 		$data["prefixes"] = json_encode( $this->prefix->getPrefixes( $ontology_id ) );
 		
 		$this->load->view('header_s', $head);

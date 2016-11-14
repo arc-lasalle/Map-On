@@ -281,7 +281,7 @@ class Datasource_model extends CI_Model
 		$this->team->db->update('sourcecolumn', $data);
 	}
 
-	function setDbgraphLayout( $datasource_id, $tableid, $insert, $layoutX, $layoutY )
+	function setDatasourceLayout( $datasource_id, $tableid, $insert, $layoutX, $layoutY )
 	{
 		// Delete if exist.
 		$this->team->db->where("datasource_id", $datasource_id);

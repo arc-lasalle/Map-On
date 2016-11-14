@@ -10,30 +10,19 @@ class Vowl_model extends CI_Model
         $ret["ok"] = false;
         $ret["status"] = "Vowl not loaded.";
         $ret["vowl"] = "";
-
-		
+        
 		$ont = $this->ontology->getOntology($ontology_id);
-
-
-        /*
-		$owl_file_path = "/upload/owl/".$ontology_id."_".$ont->name.".owl";
-
-        // Get .owl file name from db
-        $this->team->db->select( "file" );
-        $this->team->db->from( "ontology_modules" );
-        $this->team->db->where( "ontology_id", $ontology_id );
-        $result = $this->team->db->get()->result();
-		
-        if ( !isset($result[0]->file) ) return $ret;
-        $owl_file_path = $result[0]->file;
-
-        $owl_file_path_parts = pathinfo( $owl_file_path );
-		// Get corresponding vowl .json file path
-		$json_file_path = "/upload/vowl/" . $owl_file_path_parts['filename'] . ".json";
-        */
-
+        
         $base_path = "/upload/".$this->team->dir()."/ontologies/" . $ontology_id."_".$ont->name . "/";
-        $owl_file_path = $base_path . $ont->name.".owl";
+
+        $ontology_sources = scandir(getcwd() . $base_path . "/source/");
+
+        // TODO Fix. The merge of multiple ontology modules is not correctly parsed by WebVowl.
+        if ( count($ontology_sources) == 3 ) { // ./ ../ and one ontology.
+            $owl_file_path = $base_path . "/source/" . $ontology_sources[2];
+        } else {
+            $owl_file_path = $base_path . $ont->name.".owl";
+        }
         $json_file_path = $base_path . $ont->name.".json";
 
         // Create the json vowl file if not exist.
@@ -41,10 +30,8 @@ class Vowl_model extends CI_Model
 		
         if ( !$result["ok"] ) {
             $ret["status"] = $result["error"];
-						
             return $ret;
         }
-
 
         // Read the vowl file.
         $ret["vowl"] = $this->readVowl( $json_file_path );
