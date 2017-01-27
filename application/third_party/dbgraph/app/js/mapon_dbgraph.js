@@ -169,6 +169,9 @@ function getTypeNum( type_name ) {
         case "bpchar": type_name = "varchar"; break;
         case "tsvector": type_name = "varchar"; break;
         case "_text": type_name = "varchar"; break;
+        // Oracle
+        case "varchar2": type_name = "varchar"; break;
+        case "number": type_name = "integer"; break;
     }
 
 
@@ -328,7 +331,7 @@ SQL.Designer.prototype.alignTables = function() {
     var x = 10;
     var y = 10;
     var max = 0;
-console.log("Tables per line: ",tables_per_line );
+
     this.tables.sort(function(a,b){
         return b.getRelations().length - a.getRelations().length;
     });

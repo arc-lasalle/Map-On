@@ -6,7 +6,7 @@ class R2rml_model extends CI_Model
 		parent::__construct();
         $this->load->library('parsers/r2rml_parser', 'r2rml_parser');
         $this->load->model("mapping_model", "mapping");
-
+		$this->load->model("datasource_model", "datasource");
     }
 	
 	///////////////////////////////////////
@@ -45,33 +45,33 @@ class R2rml_model extends CI_Model
 	
 	///////////////////////////////////////
 	
-	function export($datasource_id)
-	{	
-//		echo "Exporting data source: ".$datasource_id."<br><br>";
-		
+	function export( $datasource_id, $shortAlias = false )
+	{
 		///Version 1. All mapped clases of all mapping spaces are exported. No overlappings are checked
 		$db_type = "mysql";
 		$datasource = $this->datasource->getDatasource( $datasource_id );
 		if ( isset($datasource[0]->type) ) $db_type = $datasource[0]->type;
-
 
 		$outputText = "";
 		
 		$mappings = $this->mappingspace->getMappingspaces( $datasource_id );
 				
 		foreach( $mappings as $map ) {
-//			echo " - Exporting mapping space: ".$map->name."<br><br>";
 			
 			$classes = $this->mappedclass->getMappedclasses( $map->id );
 		
 			foreach( $classes as $class ) {
-//				echo " - Exporting classes: ".$class->class."<br><br>";
-
-                //$newSql = $this->mapping->generateSQL($class->mappedtablecolumn, $class->id, $datasource_id, true);
-                //$class->sql = $newSql;
 
 				$dataproperties = $this->mappeddataproperty->getMappeddataproperties($class->id);
 				$objectproperties = $this->mappedobjectproperty->getMappedobjectproperties($class->id);
+				foreach ( $dataproperties as $dp ) $dp->value = str_replace(".", "", $dp->value);
+
+				if ( $shortAlias ) {
+					$class->sql = $this->replaceAlias($datasource_id, $class->sql);
+					$class->uri = $this->replaceAlias($datasource_id, $class->uri);
+					foreach ( $objectproperties as $op ) $op->uri = $this->replaceAlias($datasource_id, $op->uri);
+					foreach ( $dataproperties as $dp ) $dp->value = $this->replaceAlias($datasource_id, $dp->value, false);
+				}
 
 				$outputText = $outputText.$this->generateR2RMLClass($db_type, $class, $dataproperties, $objectproperties);
 			}
@@ -88,7 +88,7 @@ class R2rml_model extends CI_Model
 		$ret = "\n\n";
 		$ret .= "################################################\n";
 		$ret .= "# TripleMap for ".$map->id.": ".$map->class."\n\n";
-		
+
 		$ret .= "<mapping1_".$map->id."> a rr:TriplesMap;\n";
 		if ( $db_type == 'cvs' ) {
 			$ret .= "	rr:logicalTable [ rr:tableName \"".addslashes($map->sql)."\" ];\n";
@@ -104,7 +104,7 @@ class R2rml_model extends CI_Model
 		foreach ( $dataproperties as $dp ) {
 			$ret .= "	rr:predicateObjectMap [\n";
 			$ret .= "		rr:predicate 	<".$dp->dataproperty."> ;\n";
-			$ret .= "		rr:objectMap [ rr:column \"".strtolower(str_replace(".", "", $dp->value))."\" ]\n";
+			$ret .= "		rr:objectMap [ rr:column \"".$dp->value."\" ]\n";
 			$ret .= "	];\n";
 		}
 		
@@ -227,6 +227,27 @@ class R2rml_model extends CI_Model
 			
 			$this->mappedclass->update($mappedclass->id, $mappedclass->class, $sql, $mappedclass->uri, $mappedclass->mappedtablecolumn);
 		}
+	}
+
+	function replaceAlias( $datasource_id, $str, $hasCommas = true ) {
+		if ( !isset( $this->aliasArray ) ) $this->aliasArray = $this->getAliasArray($datasource_id);
+		if ( !$hasCommas ) $str = '"' . $str . '"';
+		$result = str_replace( $this->aliasArray[0], $this->aliasArray[1], $str );
+		if ( !$hasCommas ) return substr($result, 1, strlen($result)-2);
+		return $result;
+	}
+
+	function getAliasArray( $datasource_id ) {
+		$alias = [[],[]];
+		$tables = $this->datasource->getTables( $datasource_id );
+		foreach( $tables as $i => $table ) {
+			$columns = $this->datasource->getColumns($table->id);
+			foreach( $columns as $k => $col ) {
+				$alias[0][] = '"' . $table->name . $col->name . '"';
+			}
+		}
+		for( $i = 0; $i < count($alias[0]); $i++ ) $alias[1][] = '"alias'.$i.'"';
+		return $alias;
 	}
 
 

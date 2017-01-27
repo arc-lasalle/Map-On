@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "devDependencies": {
     "grunt": "~0.4.5",
-    "grunt-contrib-jshint": "~0.10.0",
-    "grunt-contrib-nodeunit": "~0.4.1",
-    "grunt-contrib-uglify": "~0.5.0",
-    "grunt-contrib-copy": "~v0.8.2",
-    "grunt-css-selectors": "~v1.2.0",
-    "grunt-contrib-cssmin": "~v0.14.0",
-    "grunt-contrib-clean": "~0.7.0"
+    "grunt-contrib-jshint": "~1.1.0",
+    "grunt-contrib-nodeunit": "~1.0.0",
+    "grunt-contrib-uglify": "~2.0.0",
+    "grunt-contrib-copy": "~v1.0.0",
+    "grunt-css-selectors": "~1.3.0",
+    "grunt-contrib-cssmin": "~v1.0.2",
+    "grunt-contrib-clean": "~v1.0.0"
   }
 }

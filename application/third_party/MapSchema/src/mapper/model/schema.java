@@ -1,4 +1,4 @@
-package model;
+package mapper.model;
 
 
 
@@ -56,7 +56,7 @@ public class schema {
         Class.forName("oracle.jdbc.OracleDriver");
         Connection conn = DriverManager.getConnection("jdbc:oracle:thin:@//" + hostUrl + ":" + dbPort + "/" + sid, userName, password);
 
-        return generateSqlSchema( conn, "oracle", null, tableNamePattern );
+        return generateSqlSchema( conn, "oracle", userName, tableNamePattern );
     }
 
     public static String getCvsSchema ( String cvsFilePath, String commaSeparator ) {
@@ -71,6 +71,10 @@ public class schema {
     public static String generateSqlSchema ( Connection conn, String type, String schema, String tableNamePattern ) throws SQLException {
 
         XStream xs = new XStream();
+        xs.alias("model.Database", Database.class);
+        xs.alias("model.Table", Table.class);
+        xs.alias("model.Column", Column.class);
+        xs.alias("model.foreginKey", foreginKey.class);
 
         Database xml_db = new Database();
 
@@ -93,7 +97,7 @@ public class schema {
             try {
                 //System.out.println("Table: " + tableName);
 
-                ResultSet colsResultSet = meta.getColumns(null, null, tableName, "%");
+                ResultSet colsResultSet = meta.getColumns(null, schema, tableName, "%");
                 while (colsResultSet.next()) {
                     String nombreColumna = colsResultSet.getString("COLUMN_NAME"); // 4
                     String tipoColumna = colsResultSet.getString("TYPE_NAME").toLowerCase(); // 6
@@ -105,14 +109,14 @@ public class schema {
                 }
                 colsResultSet.close();
 
-                ResultSet pkResultSet = meta.getPrimaryKeys(null, null, tableName);
+                ResultSet pkResultSet = meta.getPrimaryKeys(null, schema, tableName);
                 while (pkResultSet.next()) {
                     String pk = pkResultSet.getString("COLUMN_NAME");
                     xml_tb.addPk(pk);
                 }
                 pkResultSet.close();
 
-                ResultSet fkResultSet = meta.getImportedKeys(null, null, tableName);
+                ResultSet fkResultSet = meta.getImportedKeys(null, schema, tableName);
                 while (fkResultSet.next()) {
                     String fkTableName = fkResultSet.getString("FKTABLE_NAME");
                     String fkColumnName = fkResultSet.getString("FKCOLUMN_NAME");
@@ -209,7 +213,7 @@ public class schema {
 
 
     }
-
+/*
     private static String getNameOfType( String sFieldType ) {
 
         sFieldType = sFieldType.toLowerCase();
@@ -247,7 +251,7 @@ public class schema {
         System.out.println("Type not found: " + sFieldType);
 
         return sFieldType;
-    }
+    }*/
 
     private static String getDataType( String data ) {
         data = data.replaceAll( ",", "." );

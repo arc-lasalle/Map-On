@@ -1,10 +1,10 @@
-package controller;
+package mapper.controller;
 
 
 import java.io.*;
 import java.nio.file.Paths;
 
-import static model.schema.*;
+import static mapper.model.schema.*;
 
 public class Main {
 

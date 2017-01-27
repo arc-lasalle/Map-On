@@ -25,32 +25,18 @@ class R2rml extends CI_Controller {
 	}
 		
 	public function export($datasource_id)
-	{		
-		$str = $this->r2rml->export($datasource_id);
-		
-		$prefixes = $this->r2rml->generatePrefixes();
-		
-		$part = $this->r2rml->getR2RMLPart($datasource_id);
-		
-		$str = $prefixes.$part.$str;		
-		
-		$outputfilename = "./download/".$this->team->dir()."/".$datasource_id."_R2RML.ttl";
-		
-		$fp=fopen($outputfilename,'w');
-		fwrite($fp, $str, strlen($str));
+	{
 
-		fclose($fp);
-		
-		
+
+		//$data["r2rmlcode"] = $this->exportR2RML( $datasource_id, false, false );
+		$data["filename"] = "./download/".$this->team->dir()."/".$datasource_id."_R2RML.ttl";
+
 		$datalist = $this->datasource->getDatasource($datasource_id);
 		$data["datasource"] = $datalist[0];
 		$data["ontologyName"] = $this->ontology->getOntology($data["datasource"]->ontology_id)->name;
 		
 		$data["datasource_id"] = $datasource_id;
 		
-		$data["filename"] = $outputfilename;
-		$data["r2rmlcode"] = $str;
-
 		//////////////////////////////////////////////////
 		// Bread crumb
 		$head["breadcrumb"][] = array("name" => "Data source", "link" => "datasource");
@@ -60,6 +46,24 @@ class R2rml extends CI_Controller {
 		$this->load->view('header_s', $head);
 		$this->load->view('r2rml/view', $data);
 		$this->load->view('footer_s');
+	}
+
+	public function exportR2RML( $datasource_id, $print, $shortAlias ) {
+		$str = $this->r2rml->export($datasource_id, $shortAlias );
+
+		$prefixes = $this->r2rml->generatePrefixes();
+
+		$part = $this->r2rml->getR2RMLPart($datasource_id);
+
+		$str = $prefixes.$part.$str;
+
+		$outputfilename = "./download/".$this->team->dir()."/".$datasource_id."_R2RML.ttl";
+		$fp = fopen($outputfilename,'w');
+		fwrite($fp, $str, strlen($str));
+		fclose($fp);
+
+		if ( $print ) echo $str;
+		return $str;
 	}
 	
 	public function import($datasource_id)
@@ -101,9 +105,9 @@ class R2rml extends CI_Controller {
 	}
 		
 		
-	function edit($datasource_id)
+	function edit($datasource_id,$shortAlias = false)
 	{
-		$str = $this->r2rml->export($datasource_id);
+		$str = $this->r2rml->export($datasource_id, $shortAlias);
 		
 		$prefixes = $this->r2rml->generatePrefixes();
 		
@@ -149,7 +153,7 @@ class R2rml extends CI_Controller {
 		$str = $this->r2rml->updateR2RMLPart($input_r2rmlpart, $user_id, $datasource_id);
 		//$mappingspaceid = $this->mappingspace->add($name, $user_id, $datasource_id);
 	
-		$this->export($datasource_id);
+		redirect('r2rml/export/'.$datasource_id);
 	}
 	
 	

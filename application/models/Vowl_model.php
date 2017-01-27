@@ -14,15 +14,8 @@ class Vowl_model extends CI_Model
 		$ont = $this->ontology->getOntology($ontology_id);
         
         $base_path = "/upload/".$this->team->dir()."/ontologies/" . $ontology_id."_".$ont->name . "/";
-
-        $ontology_sources = scandir(getcwd() . $base_path . "/source/");
-
-        // TODO Fix. The merge of multiple ontology modules is not correctly parsed by WebVowl.
-        if ( count($ontology_sources) == 3 ) { // ./ ../ and one ontology.
-            $owl_file_path = $base_path . "/source/" . $ontology_sources[2];
-        } else {
-            $owl_file_path = $base_path . $ont->name.".owl";
-        }
+        
+        $owl_file_path = $base_path . $ont->name.".owl";
         $json_file_path = $base_path . $ont->name.".json";
 
         // Create the json vowl file if not exist.

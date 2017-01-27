@@ -251,10 +251,16 @@ class Ontology extends CI_Controller {
             if ( !is_dir($ontology_dir) ) mkdir($ontology_dir, 0777, true);
             move_uploaded_file($_FILES['input_attachment']['tmp_name'], $ontology_dir.$file_name );
 
-
+			
 			$store_Mysql = $this->workspaces_model->connect_workspace("ontology_".$ontology_id);
-
-			$this->ontology->loadOntology($store_Mysql, $ontology_dir.$file_name, $ontology_id, $prefix);
+			
+			try {
+				$this->ontology->loadOntology($store_Mysql, $ontology_dir.$file_name, $ontology_id, $prefix);
+			} catch (Exception $e) {
+				$this->maponrouting->showMessage(false, "ERROR CO260: Error uploading file.", $e->getMessage());
+				redirect('ontology/view/' . $ontology_id);
+			}
+			
 			
 			//$this->ontology->updatePrefix($prefix, $targetfile, $ontology_id);
 			
@@ -267,8 +273,10 @@ class Ontology extends CI_Controller {
 			$vowlFile = $ontology_dir . "../" . $ontology_name . ".json";
 			if ( file_exists($vowlFile) ) unlink($vowlFile);
 
+			$this->maponrouting->showMessage(true, "File uploaded successfully.");
+			
 		} else {
-			echo "Error uploading the file : ";
+			$this->maponrouting->showMessage(false, "ERROR CO277: Error uploading file.");
 		}
 		
 			

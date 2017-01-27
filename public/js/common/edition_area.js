@@ -251,10 +251,9 @@ editionArea.prototype.loadDbgraph = function() {
         graph.alignTables();
         graph.sync();
 
-        for ( var i = 0; i < tables.length; i++ ) {
-            if ( tables[i].layoutX == 0 && tables[i].layoutY == 0 ) continue;
-            console.log("Entra");
-            graph.mapon_moveTable( tables[i].name, tables[i].layoutX, tables[i].layoutY );
+        for ( var i = 0; i < layout.length; i++ ) {
+            if ( layout[i].layoutX == 0 && layout[i].layoutY == 0 ) continue;
+            graph.mapon_moveTable( layout[i].name, layout[i].layoutX, layout[i].layoutY );
         }
 
         graph.sync();

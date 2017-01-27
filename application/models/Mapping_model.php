@@ -28,8 +28,8 @@ class Mapping_model extends CI_Model
 			$joins = Array();
 			$selects = array();
 			
-			$selects[strtolower($classTableArr[0].".".$classTableArr[1])] = 1;
-			$tables[strtolower($classTableArr[0])] = 1;
+			$selects[$classTableArr[0].".".$classTableArr[1]] = 1;
+			$tables[$classTableArr[0]] = 1;
 
 			// Actual
 			$classrange = $this->mappedclass->getMappedclass($mappedclass_id);
@@ -58,7 +58,7 @@ class Mapping_model extends CI_Model
 			
 			foreach ($dataproperties  as $dataprop){
 				
-				if (!array_key_exists(strtolower($dataprop->value), $selects)) $selects[strtolower($dataprop->value)] = 1;
+				if (!array_key_exists(($dataprop->value), $selects)) $selects[($dataprop->value)] = 1;
 			}
 			
 			/*
@@ -82,7 +82,7 @@ class Mapping_model extends CI_Model
 			$sqlParts['select'] = [];
 
 			foreach( $selkeys as $select_tablePcolumn ) {
-				$select_tablePcolumn = explode( ".", strtolower($select_tablePcolumn) );
+				$select_tablePcolumn = explode( ".", ($select_tablePcolumn) );
 
 				$sel['table'] = $select_tablePcolumn[0];
 				$sel['column'] = $select_tablePcolumn[1];
@@ -93,7 +93,7 @@ class Mapping_model extends CI_Model
 			$sqlParts['from'] = [];
 
 			if ( count($tabkeys) > 0 ) {
-                $from_graphPtable = explode( ".", strtolower($tabkeys[0]) );
+                $from_graphPtable = explode( ".", ($tabkeys[0]) );
 
                 if ( count($from_graphPtable) > 1 ) {
                     $from['postgresGraph'] = $from_graphPtable[0];
@@ -116,11 +116,11 @@ class Mapping_model extends CI_Model
 					continue;
 				}
 
-                $on = explode( "=", strtolower(str_replace(" ", "", $joikeys[$i-1])) );
+                $on = explode( "=", (str_replace(" ", "", $joikeys[$i-1])) );
 				$join_tablePcolumn1 = explode( ".", $on[0] );
 				$join_tablePcolumn2 = explode( ".", $on[1] );
 
-				$join['table'] = strtolower($tabkeys[$i]);
+				$join['table'] = ($tabkeys[$i]);
 
 				$join['table1'] = $join_tablePcolumn1[0];
 				$join['column1'] = $join_tablePcolumn1[1];
@@ -133,7 +133,7 @@ class Mapping_model extends CI_Model
 			$sqlParts['where'] = [];
 
 			for($i = 0; $i < count($selkeys); $i++) {
-				$where_tablePcolumn = explode( ".", strtolower($selkeys[$i]) );
+				$where_tablePcolumn = explode( ".", ($selkeys[$i]) );
 
 				$where['table'] = $where_tablePcolumn[0];
 				$where['column'] = $where_tablePcolumn[1];
@@ -159,21 +159,21 @@ class Mapping_model extends CI_Model
 		$pathkeys = array_keys($path);
 		
 		for($i = 0; $i < count($pathkeys) -1; $i++) {
-			if (!array_key_exists(strtolower($pathkeys[$i]), $tables)) $tables[strtolower($pathkeys[$i])] = 1;
+			if (!array_key_exists(($pathkeys[$i]), $tables)) $tables[($pathkeys[$i])] = 1;
 
 			$join = $this->getJoinBetween($pathkeys[$i], $pathkeys[$i+1], $selects, $datasource_id);
 			
-			if (!array_key_exists(strtolower($join), $joins)) $joins[strtolower($join)] = 1;
+			if (!array_key_exists(($join), $joins)) $joins[($join)] = 1;
 		}
 		
 		$strdomain = explode ("->", $domain);	
 		$strrange = explode ("->", $range);	
 
-		if (!array_key_exists(strtolower($strdomain[0]), $tables)) $tables[strtolower($strdomain[0])] = 1;
-		if (!array_key_exists(strtolower($strrange[0]), $tables)) $tables[strtolower($strrange[0])] = 1;
+		if (!array_key_exists(($strdomain[0]), $tables)) $tables[($strdomain[0])] = 1;
+		if (!array_key_exists(($strrange[0]), $tables)) $tables[($strrange[0])] = 1;
 
-		if (!array_key_exists(strtolower($strdomain[0].".".$strdomain[1]), $selects)) $selects[strtolower($strdomain[0].".".$strdomain[1])] = 1;
-		if (!array_key_exists(strtolower($strrange[0].".".$strrange[1]), $selects)) $selects[strtolower($strrange[0].".".$strrange[1])] = 1;
+		if (!array_key_exists(($strdomain[0].".".$strdomain[1]), $selects)) $selects[($strdomain[0].".".$strdomain[1])] = 1;
+		if (!array_key_exists(($strrange[0].".".$strrange[1]), $selects)) $selects[($strrange[0].".".$strrange[1])] = 1;
 	}
 	
 	///////////////////////////////////////
@@ -185,15 +185,15 @@ class Mapping_model extends CI_Model
 		
 		if(count($col1) > 0) {
 			
-			if (!array_key_exists(strtolower($table1.".".$col1[0]->foreignkey), $selects)) $selects[strtolower($table1.".".$col1[0]->foreignkey)] = 1;
-			if (!array_key_exists(strtolower($table2.".".$col1[0]->columnname), $selects)) $selects[strtolower($table2.".".$col1[0]->columnname)] = 1;
+			if (!array_key_exists(($table1.".".$col1[0]->foreignkey), $selects)) $selects[($table1.".".$col1[0]->foreignkey)] = 1;
+			if (!array_key_exists(($table2.".".$col1[0]->columnname), $selects)) $selects[($table2.".".$col1[0]->columnname)] = 1;
 			
 			return $table1.".".$col1[0]->foreignkey." = ".$table2.".".$col1[0]->columnname;
 			
 		} else if(count($col2) > 0) {
 
-			if (!array_key_exists(strtolower($table1.".".$col2[0]->columnname), $selects)) $selects[strtolower($table1.".".$col2[0]->columnname)] = 1;
-			if (!array_key_exists(strtolower($table2.".".$col2[0]->foreignkey), $selects)) $selects[strtolower($table2.".".$col2[0]->foreignkey)] = 1;
+			if (!array_key_exists(($table1.".".$col2[0]->columnname), $selects)) $selects[($table1.".".$col2[0]->columnname)] = 1;
+			if (!array_key_exists(($table2.".".$col2[0]->foreignkey), $selects)) $selects[($table2.".".$col2[0]->foreignkey)] = 1;
 
 			return $table1.".".$col2[0]->columnname." = ".$table2.".".$col2[0]->foreignkey;
 		}
@@ -223,8 +223,8 @@ class Mapping_model extends CI_Model
 		
 		//$this->breadh_first($domainTableArr[0], $targetTableArr[0], $datasource_id, $visited, $path);
 		//$path = $path.$target;
-		if (!array_key_exists(strtolower($targetTableArr[0]), $path)) 
-			$path[strtolower($targetTableArr[0])] = 1;
+		if (!array_key_exists(($targetTableArr[0]), $path))
+			$path[($targetTableArr[0])] = 1;
 		
 		return $path;
 	}
@@ -299,7 +299,7 @@ class Mapping_model extends CI_Model
 	
 	function recursivePathDFS($domain, $target, $datasource_id, &$visited, &$path)
 	{
-		$visited[strtolower($target)] = 1;
+		$visited[($target)] = 1;
 		$ret = "";
 	
 		if(strcasecmp ($domain, $target) == 0) {
@@ -349,7 +349,7 @@ class Mapping_model extends CI_Model
 		foreach(array_keys($nextTables) as $ntable) {
 			$ntableArr = explode ("->", $ntable);
 			
-			if (array_key_exists(strtolower($ntableArr[0]), $visited) && $ret == "") {
+			if (array_key_exists(($ntableArr[0]), $visited) && $ret == "") {
 			} else {
 		
 				$retRec = $this->recursivePathDFS($domain , $ntableArr[0], $datasource_id, $visited, $path) ;
@@ -359,8 +359,8 @@ class Mapping_model extends CI_Model
 						
 				//	$path[] = $ntableArr[0];
 					
-					if (!array_key_exists(strtolower($ntableArr[0]), $path)) 
-						$path[strtolower($ntableArr[0])] = 1;
+					if (!array_key_exists(($ntableArr[0]), $path))
+						$path[($ntableArr[0])] = 1;
 					
 			//		echo "<br>Path: ".$ntable."<br>";
 			//		var_dump($path);
@@ -456,13 +456,13 @@ class Mapping_model extends CI_Model
 			
 			$datasource = $this->datasource->getDatasource( $datasource_id );
 			if ( isset($datasource[0]->type) && ( $datasource[0]->type == "cvs" ) ) {
-				return $basic_uri.strtolower($arr2[1]).'/{'. $q . strtolower($arr[1]) . $q .'}';
+				return $basic_uri.($arr2[1]).'/{'. $q . ($arr[1]) . $q .'}';
 			}
 			
 			if(count($arr) == 2) {
-				return $basic_uri.strtolower($arr2[1]).'/{'. $q . strtolower($arr[0].$arr[1]) . $q .'}';
+				return $basic_uri.($arr2[1]).'/{'. $q . ($arr[0].$arr[1]) . $q .'}';
 			} else {
-				return $basic_uri.strtolower($arr2[1]).'/{\"...\"}';
+				return $basic_uri.($arr2[1]).'/{\"...\"}';
 			}
 		} else {
 			return '';
@@ -489,7 +489,7 @@ class Mapping_model extends CI_Model
 		$ret = '';
 		
 		if(count($arr2) == 2) 
-			$ret = $basic_uri.strtolower($arr2[1]).'/{'.$input_table.'}';
+			$ret = $basic_uri.($arr2[1]).'/{'.$input_table.'}';
 
 		return $ret;
 	}

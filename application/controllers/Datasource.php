@@ -358,6 +358,7 @@ class Datasource extends CI_Controller {
 			if ( count($columns) > 0 && !isset($columns[0]) ) $columns = Array( $columns );
 
 			foreach ( $columns as $column ) {
+				if ( !isset($column['type']) ) $column['type'] = "string";
 
 				$this->datasource->addColumn( $idTable, $column['name'], $column['type'] );
 
