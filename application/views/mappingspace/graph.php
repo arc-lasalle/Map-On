@@ -267,14 +267,28 @@
 		</div>
 	</div>
 
-	
+	<script type="text/javascript">
+		var php_vars = JSON.parse(unescape('<?php echo addslashes( json_encode($_ci_data['_ci_vars']) ); ?>'));
+		php_vars.base_url = '<?php echo base_url(); ?>';
+		php_vars.user_technician = <?php echo ($this->ion_auth->in_group("technician")==1) ? "true" : "false"  ?>;
+
+		php_vars.routes = JSON.parse('<?php echo json_encode($routes); ?>');
+		php_vars.mp_graph = JSON.parse(unescape('<?php echo addslashes( json_encode($mapping_graph) ); ?>'));
+	</script>
+
 <script>
 	var mappingGraph;
 
 	window.onload = function() {
 		mappingGraph = new mapping_graph();
 		mappingGraph.draw();
+		mappingGraph.restoreLocalPositions( php_vars.datasource.id, php_vars.mappingspace.id );
 	};
+
+	window.addEventListener("beforeunload", function (e) {
+		mappingGraph.storeLocalPositions( php_vars.datasource.id, php_vars.mappingspace.id );
+		return null;
+	});
 
 	///////////////////////////////////////////////////
 	// JS functions for Datatype selection
@@ -460,14 +474,7 @@
 
 
 	<!-- JS's -->
-	<script type="text/javascript">
-		var php_vars = JSON.parse(unescape('<?php echo addslashes( json_encode($_ci_data['_ci_vars']) ); ?>'));
-		php_vars.base_url = '<?php echo base_url(); ?>';
-		php_vars.user_technician = <?php echo ($this->ion_auth->in_group("technician")==1) ? "true" : "false"  ?>;
 
-		php_vars.routes = JSON.parse('<?php echo json_encode($routes); ?>');
-		php_vars.mp_graph = JSON.parse(unescape('<?php echo addslashes( json_encode($mapping_graph) ); ?>'));
-	</script>
 
 	<script src="<?php echo base_url(); ?>/public/js/common/mapping_graph.js" language="javascript" type="text/javascript" ></script>
 

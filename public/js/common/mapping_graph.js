@@ -45,8 +45,44 @@ function mapping_graph () {
     this.graphics.placeLink( function ( linkUI, fromPos, toPos ) {
         return self.placeLink( self, linkUI, fromPos, toPos );
     });
+
 }
 
+mapping_graph.prototype.storeLocalPositions = function ( datasource_id, mappigspace_id ) {
+    var positions, numNodes, position, i, self;
+
+    self = this;
+    numNodes = this.graph.getNodesCount();
+
+    i = 0;
+    positions = [];
+    this.graph.forEachNode( function( node ) {
+        position = self.layout.getNodePosition(node.id);
+
+        positions.push( { id: node.id, x: position.x, y: position.y } );
+
+        if ( ++i == numNodes ) {
+            sessionStorage.setItem(
+                "graphNodePositions_" + datasource_id + "_" + mappigspace_id,
+                JSON.stringify(positions) );
+        }
+
+    });
+
+};
+
+mapping_graph.prototype.restoreLocalPositions = function ( datasource_id, mappigspace_id ) {
+    var positions, self;
+
+    self = this;
+    positions = sessionStorage.getItem( "graphNodePositions_" + datasource_id + "_" + mappigspace_id );
+    positions = JSON.parse( positions );
+
+    if ( positions == null ) return;
+    for ( var i = 0; i < positions.length; i++ ) {
+        self.layout.setNodePosition( self.graph.getNode( positions[i].id ), positions[i].x, positions[i].y );
+    }
+};
 
 
 mapping_graph.prototype.draw = function () {
@@ -130,9 +166,16 @@ mapping_graph.prototype.draw = function () {
 
 
 
-            if (typeof classNode['objectProperty'] != 'undefined') {
-                nodeData.parent = classNode['objectProperty']['domainQname'];
-                nodeData.linkDesc = classNode['objectProperty']['qname'];
+            if ( typeof classNode['ranges'] != 'undefined' ) {
+                nodeData.parent = [];
+                nodeData.linkDesc = [];
+                for ( var i = 0; i < classNode['ranges'].length; i++ ) {
+                    nodeData.parent[i] = classNode['ranges'][i]['domainQname'];
+                    nodeData.linkDesc[i] = classNode['ranges'][i]['qname'];
+                }
+
+                //nodeData.parent = classNode['ranges'][0]['domainQname'];
+                //nodeData.linkDesc = classNode['ranges'][0]['qname'];
             }
 
             if ( typeof classNode['layoutX'] != 'undefined' && typeof classNode['layoutY'] != 'undefined' ) {
@@ -175,7 +218,6 @@ mapping_graph.prototype.draw = function () {
         }
 
     }
-    
 
     this.renderer.run();
     $('#ea_loader').addClass('hidden');
@@ -237,7 +279,7 @@ mapping_graph.prototype.addNode = function ( nodeData ) {
 
     if ( typeof nodeData.parent != 'undefined' ) {
 
-        var linkData = { connectionStrength: 0.9 }
+        var linkData = { connectionStrength: 0.9 };
 
         switch ( nodeData.type ) {
             case 'class': linkData.type = 'class-class'; break;
@@ -246,9 +288,20 @@ mapping_graph.prototype.addNode = function ( nodeData ) {
             default: linkData.type = 'table-column';
         }
 
-        if ( typeof nodeData.linkDesc !== 'undefined' ) linkData.label = nodeData.linkDesc;
+        if ( nodeData.parent instanceof Array ) {
+            for ( var i = 0; i < nodeData.parent.length; i++ ) {
+                var ld = clone(linkData);
 
-        this.graph.addLink( nodeData.parent.toLowerCase(), nodeData.id.toLowerCase(), linkData );
+                if ( typeof nodeData.linkDesc[i] !== 'undefined' ) ld.label = nodeData.linkDesc[i];
+
+                this.graph.addLink( nodeData.parent[i].toLowerCase(), nodeData.id.toLowerCase(), ld );
+            }
+        } else {
+            if ( typeof nodeData.linkDesc !== 'undefined' ) linkData.label = nodeData.linkDesc;
+
+            this.graph.addLink( nodeData.parent.toLowerCase(), nodeData.id.toLowerCase(), linkData );
+        }
+
     }
 
     return true;
@@ -920,3 +973,7 @@ mapping_graph.prototype.toggleTable = function( table_id, show ) {
 
 
 };
+
+function clone( obj ) {
+    return JSON.parse(JSON.stringify( obj ));
+}

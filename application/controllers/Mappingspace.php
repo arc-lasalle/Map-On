@@ -117,12 +117,15 @@ class Mappingspace extends CI_Controller {
                 foreach( $data["classes"] as $range ) {
 
                     if ( $range->class == $op->target ) {
-                        $range->objectProperty = new stdClass();
-                        $range->objectProperty->domainUri = $classNode->uri;
-                        $range->objectProperty->domainQname = $classNode->qname;
-                        $range->objectProperty->uri = $op->objectproperty;
-                        $range->objectProperty->qname = $this->prefix->getQName( $op->objectproperty, $ontology_id );
-                    }
+						if ( !isset($range->ranges) ) $range->ranges = [];
+
+						$r = new stdClass();
+						$r->domainUri = $classNode->uri;
+						$r->domainQname = $classNode->qname;
+						$r->uri = $op->objectproperty;
+						$r->qname = $this->prefix->getQName( $op->objectproperty, $ontology_id );
+						$range->ranges[] = $r;
+					}
                 }
 
             }
