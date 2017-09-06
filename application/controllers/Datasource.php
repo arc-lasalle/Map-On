@@ -142,6 +142,7 @@ class Datasource extends CI_Controller {
 		$name = $this->input->post('input_name');
 		
 		$basicuri = $this->input->post('input_basicuri');
+		$basicuri = trim($basicuri);
 		$ontology_id = $this->input->post('input_ontology');
 		$file_type = $this->input->post('file_type');
 		$user_id = 1;
@@ -153,15 +154,20 @@ class Datasource extends CI_Controller {
 		}
 
 		if ( $name == "" ) {
-			$this->session->set_flashdata('error_message', [false, "Name not set." ]);
+			$this->session->set_flashdata('error_message', [false, "Invalid datasource name" ]);
 			redirect("datasource");
 		}
 
 		if ( $basicuri == "" ) {
-			$this->session->set_flashdata('error_message', [false, "Base uri not set." ]);
+			$this->session->set_flashdata('error_message', [false, "Invalid Base URI" ]);
 			redirect("datasource");
 		}
 
+		$last_baseuri_char = $basicuri[strlen($basicuri)];
+		if ( $last_baseuri_char != "/" && $last_baseuri_char != "#" ) {
+			$this->session->set_flashdata('error_message', [false, "The Base URI must end with one of these symbols: '/', '#'" ]);
+			redirect("datasource");
+		}
 
 
 
@@ -650,7 +656,7 @@ class Datasource extends CI_Controller {
 			//Updating mapping class
 			$query ="UPDATE mappedclass SET uri = REPLACE(uri, '".$basicuriFrom."', '".$basicuriTo."') WHERE mappingspace_id = ".$row->id;
 						
-			$this->db->query ($query);
+			$this->team->db->query ($query);
 			
 			$classlist = $this->mappedclass->getMappedclasses($row->id);
 			
@@ -659,7 +665,7 @@ class Datasource extends CI_Controller {
 				//Updating object properties
 				$query ="UPDATE mappedobjectproperty SET uri = REPLACE(uri, '".$basicuriFrom."', '".$basicuriTo."') WHERE mappedclassdomain_id = ".$rowClass->id. " OR mappedclassrange_id= ".$rowClass->id;
 						
-				$this->db->query ($query);
+				$this->team->db->query ($query);
 			}
 		}
 		
@@ -667,7 +673,7 @@ class Datasource extends CI_Controller {
 		
 		$query ="UPDATE r2rmlparts SET text = REPLACE(text, '".$basicuriFrom."', '".$basicuriTo."') WHERE datasource_id = ".$datasource_id;
 						
-		$this->db->query ($query);
+		$this->team->db->query ($query);
 	}
 	
 	///////////////////////////////
@@ -689,7 +695,7 @@ class Datasource extends CI_Controller {
 			//Updating mapping class
 			$query ="UPDATE mappedclass SET class = REPLACE(class, '".$prefixFrom."', '".$prefixTo."') WHERE mappingspace_id = ".$row->id;
 						
-			$this->db->query ($query);
+			$this->team->db->query ($query);
 			
 			$classlist = $this->mappedclass->getMappedclasses($row->id);
 			
@@ -698,12 +704,12 @@ class Datasource extends CI_Controller {
 				//Updating object properties
 				$query ="UPDATE mappedobjectproperty SET objectproperty = REPLACE(objectproperty, '".$prefixFrom."', '".$prefixTo."') WHERE mappedclassdomain_id = ".$rowClass->id. " OR mappedclassrange_id= ".$rowClass->id;
 						
-				$this->db->query ($query);
+				$this->team->db->query ($query);
 				
 				//Updating data properties
 				$query ="UPDATE mappeddataproperty SET dataproperty = REPLACE(dataproperty, '".$prefixFrom."', '".$prefixTo."') WHERE mappedclass_id = ".$rowClass->id;
 						
-				$this->db->query ($query);
+				$this->team->db->query ($query);
 			}
 		}
 		
@@ -711,7 +717,7 @@ class Datasource extends CI_Controller {
 		
 		$query ="UPDATE r2rmlparts SET text = REPLACE(text, '".$prefixFrom."', '".$prefixTo."') WHERE datasource_id = ".$datasource_id;
 						
-		$this->db->query ($query);
+		$this->team->db->query ($query);
 		
 
 		
