@@ -163,7 +163,7 @@ class Datasource extends CI_Controller {
 			redirect("datasource");
 		}
 
-		$last_baseuri_char = $basicuri[strlen($basicuri)];
+		$last_baseuri_char = $basicuri[strlen($basicuri)-1];
 		if ( $last_baseuri_char != "/" && $last_baseuri_char != "#" ) {
 			$this->session->set_flashdata('error_message', [false, "The Base URI must end with one of these symbols: '/', '#'" ]);
 			redirect("datasource");
