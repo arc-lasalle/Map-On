@@ -31,6 +31,10 @@ Map-On tool has been developed in PHP using the framework Code Igniter. The grap
 
 For the Map-On installation please go to the [Installation guide](./docs/installation.md)
 
-Copyright (C) 2016 ARC Engineering and Architecture La Salle, Ramon Llull University.
+Please cite Map-On with the following reference:
+
+>Sicilia, Álvaro; Nemirovski, German; Nolle, Andreas. [Map-on: A web-based editor for visual ontology mapping](http://www.semantic-web-journal.net/system/files/swj1266.pdf). Semantic Web, vol. 8, no. 6, pp. 969-980, 2017.
+
+Copyright (C) 2017 ARC Engineering and Architecture La Salle, Ramon Llull University.
  
 for comments please contact Alvaro Sicilia (ascilia@salleurl.edu)
