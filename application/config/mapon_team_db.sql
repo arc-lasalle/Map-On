@@ -27,8 +27,8 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `configuration` (
-  `name` varchar(256) NOT NULL,
-  `value` varchar(256) NOT NULL
+  `name` varchar(255) NOT NULL,
+  `value` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 --
@@ -46,11 +46,11 @@ INSERT INTO `configuration` (`name`, `value`) VALUES
 
 CREATE TABLE `datasource` (
   `id` int(11) NOT NULL,
-  `name` varchar(256) COLLATE utf8_bin NOT NULL,
-  `type` varchar(256) COLLATE utf8_bin NOT NULL,
-  `sqlfile` varchar(256) COLLATE utf8_bin NOT NULL,
+  `name` varchar(255) COLLATE utf8_bin NOT NULL,
+  `type` varchar(255) COLLATE utf8_bin NOT NULL,
+  `sqlfile` varchar(255) COLLATE utf8_bin NOT NULL,
   `stringconnection` text COLLATE utf8_bin NOT NULL,
-  `xmlfile` varchar(256) COLLATE utf8_bin NOT NULL,
+  `xmlfile` varchar(255) COLLATE utf8_bin NOT NULL,
   `basicuri` text COLLATE utf8_bin NOT NULL,
   `date` date NOT NULL,
   `user_id` int(11) NOT NULL,
@@ -64,7 +64,7 @@ CREATE TABLE `datasource` (
 --
 
 CREATE TABLE `datasource_layout` (
-  `tableid` varchar(256) NOT NULL,
+  `tableid` varchar(255) NOT NULL,
   `layoutX` int(11) NOT NULL,
   `layoutY` int(11) NOT NULL,
   `datasource_id` int(11) NOT NULL
@@ -78,10 +78,10 @@ CREATE TABLE `datasource_layout` (
 
 CREATE TABLE `log` (
   `id` int(11) NOT NULL,
-  `location` varchar(256) NOT NULL,
-  `user_name` varchar(256) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `user_name` varchar(255) NOT NULL,
   `log_message` text NOT NULL,
-  `action` varchar(256) NOT NULL,
+  `action` varchar(255) NOT NULL,
   `date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
@@ -93,10 +93,10 @@ CREATE TABLE `log` (
 
 CREATE TABLE `mappedclass` (
   `id` int(11) NOT NULL,
-  `class` varchar(256) COLLATE utf8_bin NOT NULL,
+  `class` varchar(255) COLLATE utf8_bin NOT NULL,
   `sql` text COLLATE utf8_bin NOT NULL,
   `uri` text COLLATE utf8_bin NOT NULL,
-  `mappedtablecolumn` varchar(256) COLLATE utf8_bin NOT NULL,
+  `mappedtablecolumn` varchar(255) COLLATE utf8_bin NOT NULL,
   `date` date NOT NULL,
   `user_id` int(11) NOT NULL,
   `mappingspace_id` int(11) NOT NULL
@@ -110,7 +110,7 @@ CREATE TABLE `mappedclass` (
 
 CREATE TABLE `mappedclass_layout` (
   `id` int(11) NOT NULL,
-  `nodeid` varchar(256) NOT NULL,
+  `nodeid` varchar(255) NOT NULL,
   `layoutX` int(11) NOT NULL,
   `layoutY` int(11) NOT NULL,
   `mappedclass_id` int(11) NOT NULL
@@ -124,7 +124,7 @@ CREATE TABLE `mappedclass_layout` (
 
 CREATE TABLE `mappedclass_tableson` (
   `id` int(11) NOT NULL,
-  `tableid` varchar(256) NOT NULL,
+  `tableid` varchar(255) NOT NULL,
   `mappedclass_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
@@ -136,9 +136,9 @@ CREATE TABLE `mappedclass_tableson` (
 
 CREATE TABLE `mappeddataproperty` (
   `id` int(11) NOT NULL,
-  `dataproperty` varchar(256) COLLATE utf8_bin NOT NULL,
-  `value` varchar(256) COLLATE utf8_bin NOT NULL,
-  `type` varchar(256) COLLATE utf8_bin NOT NULL,
+  `dataproperty` varchar(255) COLLATE utf8_bin NOT NULL,
+  `value` varchar(255) COLLATE utf8_bin NOT NULL,
+  `type` varchar(255) COLLATE utf8_bin NOT NULL,
   `mappedclass_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
@@ -150,7 +150,7 @@ CREATE TABLE `mappeddataproperty` (
 
 CREATE TABLE `mappedobjectproperty` (
   `id` int(11) NOT NULL,
-  `objectproperty` varchar(256) COLLATE utf8_bin NOT NULL,
+  `objectproperty` varchar(255) COLLATE utf8_bin NOT NULL,
   `uri` text COLLATE utf8_bin NOT NULL,
   `mappedclassdomain_id` int(11) NOT NULL,
   `mappedclassrange_id` int(11) NOT NULL
@@ -164,7 +164,7 @@ CREATE TABLE `mappedobjectproperty` (
 
 CREATE TABLE `mappingspace` (
   `id` int(11) NOT NULL,
-  `name` varchar(256) COLLATE utf8_bin NOT NULL,
+  `name` varchar(255) COLLATE utf8_bin NOT NULL,
   `date` date NOT NULL,
   `user_id` int(11) NOT NULL,
   `datasource_id` int(11) NOT NULL
@@ -178,7 +178,7 @@ CREATE TABLE `mappingspace` (
 
 CREATE TABLE `mappingspace_layout` (
   `id` int(11) NOT NULL,
-  `nodeid` varchar(256) NOT NULL,
+  `nodeid` varchar(255) NOT NULL,
   `layoutX` int(11) NOT NULL,
   `layoutY` int(11) NOT NULL,
   `mappingspace_id` int(11) NOT NULL
@@ -192,7 +192,7 @@ CREATE TABLE `mappingspace_layout` (
 
 CREATE TABLE `ontology` (
   `id` int(11) NOT NULL,
-  `name` varchar(256) COLLATE utf8_bin NOT NULL,
+  `name` varchar(255) COLLATE utf8_bin NOT NULL,
   `date` date NOT NULL,
   `user_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
@@ -205,7 +205,7 @@ CREATE TABLE `ontology` (
 
 CREATE TABLE `ontology_layout` (
   `id` int(11) NOT NULL,
-  `nodeid` varchar(256) NOT NULL,
+  `nodeid` varchar(255) NOT NULL,
   `layoutX` int(11) NOT NULL,
   `layoutY` int(11) NOT NULL,
   `datasource_id` int(11) NOT NULL
@@ -219,7 +219,7 @@ CREATE TABLE `ontology_layout` (
 
 CREATE TABLE `ontology_modules` (
   `id` int(11) NOT NULL,
-  `name` varchar(256) COLLATE utf8_bin NOT NULL,
+  `name` varchar(255) COLLATE utf8_bin NOT NULL,
   `file` text COLLATE utf8_bin NOT NULL,
   `url` text COLLATE utf8_bin NOT NULL,
   `ontology_id` int(11) NOT NULL
@@ -233,8 +233,8 @@ CREATE TABLE `ontology_modules` (
 
 CREATE TABLE `prefix` (
   `id` int(11) NOT NULL,
-  `prefix` varchar(256) NOT NULL,
-  `iri` varchar(256) NOT NULL,
+  `prefix` varchar(255) NOT NULL,
+  `iri` varchar(255) NOT NULL,
   `ontology_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 

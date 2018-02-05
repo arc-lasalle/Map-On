@@ -52,7 +52,7 @@ $autoload['packages'] = array();
 |	$autoload['libraries'] = array('database', 'session', 'xmlrpc');
 */
 
-$autoload['libraries'] = array( 'database', 'session', 'ion_auth', 'MaponRouting', 'Team', 'MaponLog' );
+$autoload['libraries'] = array( 'database', 'session', 'ion_auth', 'MaponRouting', 'Team', 'MaponLog', 'ChromePhp' );
 //$autoload['libraries'] = array('database', 'session'); 
 
 
