@@ -59,15 +59,15 @@ class Team {
         if ( $this->db != NULL ) $this->db->close();
 
         // Obtenemos los valores del archivo ce configuracion
-        $driver = $this->ci->db->dbdriver;
-        $user = $this->ci->db->username;
-        $pass = $this->ci->db->password;
-        $host = $this->ci->db->hostname;
-        $database =  $this->ci->session->userdata('team_database')->database_name;
-
-        $dsn = $driver . '://' . $user . ':' . $pass . '@' . $host . '/' . $database;
-
-        $this->db = $this->ci->load->database( $dsn, TRUE );
+        $dsn = [
+			'dbdriver' => $this->ci->db->dbdriver,
+			'username' => $this->ci->db->username,
+			'password' => $this->ci->db->password,
+			'hostname' => $this->ci->db->hostname,
+			'database' => $this->ci->session->userdata('team_database')->database_name
+		];
+		
+		$this->db = $this->ci->load->database( $dsn, TRUE );
 
         if ( $this->db->conn_id == false ) {
             //$this->ci->session->unset_userdata('team_database');
