@@ -37,4 +37,4 @@ Please cite Map-On with the following reference:
 
 Copyright (C) 2017 ARC Engineering and Architecture La Salle, Ramon Llull University.
  
-for comments please contact Alvaro Sicilia (ascilia@salleurl.edu)
+for comments please contact Álvaro Sicilia (alvaro.sicilia@salle.url.edu)
