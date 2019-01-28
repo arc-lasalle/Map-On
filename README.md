@@ -35,6 +35,6 @@ Please cite Map-On with the following reference:
 
 >Sicilia, Álvaro; Nemirovski, German; Nolle, Andreas. [Map-on: A web-based editor for visual ontology mapping](http://www.semantic-web-journal.net/system/files/swj1266.pdf). Semantic Web, vol. 8, no. 6, pp. 969-980, 2017.
 
-Copyright (C) 2017 ARC Engineering and Architecture La Salle, Ramon Llull University.
+Copyright (C) 2019 ARC Engineering and Architecture La Salle, Ramon Llull University.
  
 for comments please contact Álvaro Sicilia (alvaro.sicilia@salle.url.edu)
